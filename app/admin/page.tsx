@@ -68,6 +68,7 @@ export default function ActivitiesAdmin() {
     duration: "",
   });
 
+  // Fetch activities and activity types on mount
   useEffect(() => {
     fetchActivities();
     fetchActivityTypes();
