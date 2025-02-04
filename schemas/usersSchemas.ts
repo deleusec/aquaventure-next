@@ -4,5 +4,5 @@ export const updateUserSchema = z.object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     email: z.string().email().optional(),
-    role: z.enum(["user", "admin"]).optional(),
+    role: z.enum(["USER", "ADMIN"]).optional(),
 });

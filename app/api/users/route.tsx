@@ -4,6 +4,9 @@ import { getSession } from "@/lib/auth";
 
 export async function GET() {
     const session = await getSession();
+
+    console.log(session);
+    
     if (!session || session.role !== "ADMIN") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
