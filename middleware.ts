@@ -15,13 +15,14 @@ export async function middleware(request: NextRequest) {
     if (!token) {
         return NextResponse.redirect(`${origin}/login`);
     }
-
+    
     const session = await verifyJWT(token);
     if (!session) {
         return NextResponse.redirect(`${origin}/login`);
     }
 
-    if (pathname.startsWith("/admin") && session.role !== "admin") {
+    
+    if (pathname.startsWith("/admin") && session.role !== "ADMIN") {
         return NextResponse.redirect(`${origin}/unauthorized`);
     }
 
