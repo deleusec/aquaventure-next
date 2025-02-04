@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,8 @@ export default function NewActivity() {
     startDateTime: "",
     duration: "",
   });
-  const [error, setError] = useState("");
+  const [activityError, setActivityError] = useState("");
+  const [typeError, setTypeError] = useState("");
 
   const fetchActivityTypes = async () => {
     try {
@@ -46,7 +46,7 @@ export default function NewActivity() {
       const data = await res.json();
       setActivityTypes(data);
     } catch (error) {
-      setError("Erreur lors du chargement des types d'activités");
+      setTypeError("Erreur lors du chargement des types d'activités");
     }
   };
 
@@ -56,7 +56,7 @@ export default function NewActivity() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setActivityError("");
 
     try {
       const res = await fetch("/api/activities", {
@@ -72,7 +72,7 @@ export default function NewActivity() {
 
       router.push("/admin/activities");
     } catch (error) {
-      setError(
+      setActivityError(
         error instanceof Error ? error.message : "Une erreur est survenue"
       );
     }
@@ -80,6 +80,8 @@ export default function NewActivity() {
 
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTypeError("");
+
     try {
       const res = await fetch("/api/activities/types", {
         method: "POST",
@@ -93,145 +95,169 @@ export default function NewActivity() {
       setNewTypeName("");
       setIsDialogOpen(false);
     } catch (error) {
-      setError("Erreur lors de la création du type");
+      setTypeError("Erreur lors de la création du type");
     }
   };
 
   return (
-    <div className="w-full justify-center flex">
-      <div className="container max-w-2xl py-8 justify-center flex-col">
-        <Card>
-          <CardHeader>
-            <CardTitle>Nouvelle Activité</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+    <div className="flex flex-col justify-center items-center">
+      <h1 className="text-2xl font-bold mb-6">Nouvelle Activité</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nom</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </div>
+      {activityError && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{activityError}</AlertDescription>
+        </Alert>
+      )}
 
-              <div className="space-y-2">
-                <Label htmlFor="activityType">Type d'activité</Label>
-                <div className="flex gap-2">
-                  <Select
-                    value={formData.activityTypeId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, activityTypeId: value })
-                    }
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Sélectionner un type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {activityTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id.toString()}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="secondary">+ Type</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Nouveau Type d'Activité</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleCreateType} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="typeName">Nom du type</Label>
-                          <Input
-                            id="typeName"
-                            value={newTypeName}
-                            onChange={(e) => setNewTypeName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <Button type="submit" className="w-full">
-                          Créer le type
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl w-full">
+        <div className="space-y-2">
+          <Label htmlFor="name">Nom</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
+        </div>
 
-              {/* Reste du formulaire inchangé */}
-              <div className="space-y-2">
-                <Label htmlFor="availableSpots">Places disponibles</Label>
-                <Input
-                  id="availableSpots"
-                  type="number"
-                  min="1"
-                  value={formData.availableSpots}
-                  onChange={(e) =>
-                    setFormData({ ...formData, availableSpots: e.target.value })
-                  }
-                  required
-                />
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="activityType">Type d'activité</Label>
+          <div className="flex gap-2">
+            <Select
+              value={formData.activityTypeId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, activityTypeId: value })
+              }
+            >
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Sélectionner un type" />
+              </SelectTrigger>
+              <SelectContent>
+                {activityTypes.map((type) => (
+                  <SelectItem key={type.id} value={type.id.toString()}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) setTypeError("");
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button variant="secondary">+ Type</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nouveau Type d'Activité</DialogTitle>
+                </DialogHeader>
+                {typeError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{typeError}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={handleCreateType} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="typeName">Nom du type</Label>
+                    <Input
+                      id="typeName"
+                      value={newTypeName}
+                      onChange={(e) => setNewTypeName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Créer le type
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  rows={4}
-                />
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="availableSpots">Places disponibles</Label>
+          <Input
+            id="availableSpots"
+            type="number"
+            min="1"
+            value={formData.availableSpots}
+            onChange={(e) =>
+              setFormData({ ...formData, availableSpots: e.target.value })
+            }
+            required
+          />
+        </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="startDateTime">Date et heure de début</Label>
-                <Input
-                  id="startDateTime"
-                  type="datetime-local"
-                  value={formData.startDateTime}
-                  onChange={(e) =>
-                    setFormData({ ...formData, startDateTime: e.target.value })
-                  }
-                  required
-                />
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            rows={4}
+          />
+        </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="duration">Durée (en minutes)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  min="1"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: e.target.value })
-                  }
-                  required
-                />
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="startDateTime">Date et heure de début</Label>
+          <Input
+            id="startDateTime"
+            type="datetime-local"
+            value={formData.startDateTime}
+            onChange={(e) =>
+              setFormData({ ...formData, startDateTime: e.target.value })
+            }
+            required
+          />
+        </div>
 
-              <Button type="submit" className="w-full">
-                Créer l'activité
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="duration">Durée (en minutes)</Label>
+          <Input
+            id="duration"
+            type="number"
+            min="1"
+            value={formData.duration}
+            onChange={(e) =>
+              setFormData({ ...formData, duration: e.target.value })
+            }
+            required
+          />
+        </div>
+
+        <div className="pt-4">
+          <Button type="submit" className="w-full">
+            Créer l'activité
+          </Button>
+        </div>
+      </form>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau Type d'Activité</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateType} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="typeName">Nom du type</Label>
+              <Input
+                id="typeName"
+                value={newTypeName}
+                onChange={(e) => setNewTypeName(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Créer le type
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
