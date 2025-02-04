@@ -88,7 +88,7 @@ export default function NewActivity() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newTypeName }),
       });
-      
+
       if (!res.ok) throw new Error();
 
       await fetchActivityTypes();
