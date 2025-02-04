@@ -46,3 +46,31 @@ export async function DELETE(
     );
   }
 }
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const activity = await prisma.activity.findUnique({
+      where: { id },
+      include: {
+        activityType: true,
+      },
+    });
+
+    if (!activity) {
+      return NextResponse.json(
+        { error: "Activité non trouvée" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(activity);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération" },
+      { status: 500 }
+    );
+  }
+}

@@ -37,3 +37,32 @@ export async function POST(request: Request) {
     );
   }
 }
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get('search');
+
+  try {
+    const activities = await prisma.activity.findMany({
+      where: {
+        ...(search && {
+          name: {
+            contains: search
+          }
+        })
+      },
+      include: {
+        activityType: true
+      },
+      orderBy: {
+        startDateTime: 'asc'
+      }
+    });
+    
+    return NextResponse.json(activities);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération" },
+      { status: 500 }
+    );
+  }
+}
