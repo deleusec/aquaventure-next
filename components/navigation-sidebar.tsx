@@ -16,14 +16,9 @@ interface SidebarLink {
 
 const sidebarLinks: SidebarLink[] = [
   {
-    title: "Vue d'ensemble",
-    icon: <BarChart3 className="w-4 h-4" />,
-    href: "/admin",
-  },
-  {
     title: "Activités",
     icon: <Activity className="w-4 h-4" />,
-    href: "/admin/activities",
+    href: "/admin/",
   },
   {
     title: "Utilisateurs",

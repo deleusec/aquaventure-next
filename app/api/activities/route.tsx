@@ -39,27 +39,44 @@ export async function POST(request: Request) {
 }
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const search = searchParams.get('search');
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const search = searchParams.get("search") || "";
+
+  const skip = (page - 1) * limit;
 
   try {
-    const activities = await prisma.activity.findMany({
-      where: {
-        ...(search && {
+    const [total, items] = await Promise.all([
+      prisma.activity.count({
+        where: {
           name: {
-            contains: search
-          }
-        })
-      },
-      include: {
-        activityType: true
-      },
-      orderBy: {
-        startDateTime: 'asc'
-      }
+            contains: search,
+          },
+        },
+      }),
+      prisma.activity.findMany({
+        where: {
+          name: {
+            contains: search,
+          },
+        },
+        include: {
+          activityType: true,
+        },
+        orderBy: {
+          startDateTime: "desc",
+        },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return NextResponse.json({
+      items,
+      total,
     });
-    
-    return NextResponse.json(activities);
   } catch (error) {
+    console.error("Erreur de récupération:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération" },
       { status: 500 }
