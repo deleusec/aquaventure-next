@@ -23,7 +23,7 @@ interface ReservationDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function ReservationDialog({
+export default function PopupBookings({
   activity,
   open,
   onOpenChange,
@@ -40,11 +40,13 @@ export default function ReservationDialog({
           <DialogTitle>Confirmer la réservation</DialogTitle>
           <DialogDescription>
             Voulez-vous réserver une place pour {activity.name} ?
-            <div className="mt-2 text-sm">
+          </DialogDescription>
+          <div className="mt-2 text-sm">
+            <p>
               Le {formatDate(activity.startDateTime)} à{" "}
               {formatTime(activity.startDateTime)}
-            </div>
-          </DialogDescription>
+            </p>
+          </div>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
