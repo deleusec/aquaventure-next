@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, BarChart3, Settings, Users, Calendar } from "lucide-react";
+import { Activity, Settings, Users } from "lucide-react";
 
 interface SidebarLink {
   title: string;

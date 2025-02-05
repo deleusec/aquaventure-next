@@ -1,5 +1,5 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 
 export default function AppLayout({
   children,
@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main className="container mx-auto flex-1">{children}</main>
       <Footer />
     </>
   );

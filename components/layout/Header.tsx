@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Nav from "./Nav";
-import ProfilePicture from "./profile/ProfilePicture";
+import NavHeader from "./NavHeader";
+import ProfilePicture from "../profile/ProfilePicture";
 
 export default function Header() {
   return (
@@ -13,7 +13,7 @@ export default function Header() {
           height={50}
         />
       </div>
-      <Nav />
+      <NavHeader />
       <div className="flex-1 flex justify-end">
         <ProfilePicture />
       </div>
