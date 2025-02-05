@@ -53,21 +53,21 @@ body {
     --background: #0C1020;
     --background-lighter: #0E1323;
     --background-darker: #0A0E17;
-    --foreground: #F5F5F5;
+    --foreground: var(--white);
     --card: var(--background-lighter);
     --card-foreground: var(--foreground);
-    --popover: var(--background-lighter);
+    --popover: var(--background-darker);
     --popover-foreground: var(--foreground);
     --primary: var(--av-blue);
-    --primary-foreground: var(--white);
+    --primary-foreground: var(--foreground);
     --secondary: var(--av-pink);
-    --secondary-foreground: var(--white);
+    --secondary-foreground: var(--foreground);
     --tertiary: var(--av-yellow);
-    --tertiary-foreground: var(--white);
+    --tertiary-foreground: var(--foreground);
     --muted: 215 27.9% 16.9%;
     --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: var(--background-lighter);
+    --accent-foreground: var(--foreground);
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
     --border: var(--background-darker);
@@ -92,15 +92,15 @@ body {
     @apply font-semibold;
   }
   h1 {
-    @apply text-7xl font-bold;
+    @apply xl:text-7xl font-bold text-4xl;
   }
   h2 {
-    @apply text-3xl;
+    @apply xl:text-3xl text-2xl;
   }
   h3 {
-    @apply text-base;
+    @apply xl:text-base text-lg;
   }
   p {
-    @apply text-base font-light;
+    @apply xl:text-base font-light text-sm;
   }
 }

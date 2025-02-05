@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth";
+import { LogOutIcon } from "lucide-react";
 
 export default function ProfilePicture() {
   const router = useRouter();
@@ -40,9 +41,11 @@ export default function ProfilePicture() {
                 Profile
             </DropdownMenuItem>
             <DropdownMenuItem
-            color="danger"
+              color="danger"
+              className="text-destructive"
               onClick={handleLogout}
             >
+              <LogOutIcon className="w-5 h-5" />
               Logout
             </DropdownMenuItem>
         </DropdownMenuContent>
