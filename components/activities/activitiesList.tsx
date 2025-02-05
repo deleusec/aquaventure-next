@@ -123,9 +123,8 @@ export default function ActivitiesList() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Barre d'actions */}
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex h-[calc(100vh-10rem)] flex-col">
+      <div className="mb-4 flex items-center justify-between">
         <Input
           placeholder="Rechercher une activité..."
           value={search}
@@ -137,68 +136,64 @@ export default function ActivitiesList() {
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="border rounded-lg flex-1 flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <Table>
-            <TableHeader className="sticky top-0 bg-background">
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date et heure</TableHead>
-                <TableHead>Places</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array.isArray(activities) && activities.length > 0 ? (
-                activities.map((activity) => (
-                  <TableRow key={activity.id}>
-                    <TableCell className="font-medium">
-                      {activity.name}
-                    </TableCell>
-                    <TableCell>{activity.activityType.name}</TableCell>
-                    <TableCell>{formatDate(activity.startDateTime)}</TableCell>
-                    <TableCell>{activity.availableSpots}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => setEditActivity(activity)}
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteId(activity.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    Aucune activité trouvée
+      <div className="flex flex-1 flex-col rounded-t-lg border overflow-auto relative">
+        <Table>
+          <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Date et heure</TableHead>
+              <TableHead>Places</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.isArray(activities) && activities.length > 0 ? (
+              activities.map((activity) => (
+                <TableRow key={activity.id}>
+                  <TableCell className="font-medium">{activity.name}</TableCell>
+                  <TableCell>{activity.activityType.name}</TableCell>
+                  <TableCell>{formatDate(activity.startDateTime)}</TableCell>
+                  <TableCell>{activity.availableSpots}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => setEditActivity(activity)}
+                        >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => setDeleteId(activity.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  Aucune activité trouvée
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Pagination */}
-        <div className="py-4 flex items-center justify-between px-4 border-t bg-background">
+      <div className="border-t border-x border-b bg-background p-4 rounded-t-none rounded-b-lg">
+        <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             {totalItems} activité{totalItems > 1 ? "s" : ""}
           </div>

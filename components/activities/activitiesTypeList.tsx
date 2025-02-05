@@ -150,8 +150,8 @@ export default function ActivityTypesList() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
+    <div className="flex h-[calc(100vh-10rem)] flex-col overflow-hidden">
+      <div className="mb-4 flex items-center justify-between">
         <Input
           placeholder="Rechercher un type..."
           value={search}
@@ -163,54 +163,55 @@ export default function ActivityTypesList() {
         </Button>
       </div>
 
-      <div className="border rounded-lg flex-1 flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <Table>
-            <TableHeader className="sticky top-0 bg-background">
-              <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Nombre d'activités</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {types && types.length > 0 ? (
-                types.map((type) => (
-                  <TableRow key={type.id}>
-                    <TableCell>{type.name}</TableCell>
-                    <TableCell>{type._count?.activities ?? 0}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingType(type)}
-                        >
-                          Modifier
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => setDeleteId(type.id)}
-                        >
-                          Supprimer
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
-                    Aucun type d'activité trouvé
+      <div className="flex flex-1 flex-col rounded-t-lg border overflow-auto relative">
+        <Table className="min-w-full border-collapse">
+          {/* TableHeader bien fixé en haut */}
+          <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Nombre d'activités</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {types && types.length > 0 ? (
+              types.map((type) => (
+                <TableRow key={type.id}>
+                  <TableCell>{type.name}</TableCell>
+                  <TableCell>{type._count?.activities ?? 0}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingType(type)}
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setDeleteId(type.id)}
+                      >
+                        Supprimer
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center py-8">
+                  Aucun type d'activité trouvé
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        <div className="py-4 flex items-center justify-between px-4 border-t bg-background">
+      <div className="border-t border-x border-b bg-background p-4 rounded-t-none rounded-b-lg">
+        <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             {totalItems} type{totalItems > 1 ? "s" : ""} d'activité
           </div>
@@ -292,7 +293,7 @@ export default function ActivityTypesList() {
           </form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Dialog pour créer un nouveau type */}
       <Dialog open={isNewTypeDialogOpen} onOpenChange={setIsNewTypeDialogOpen}>
         <DialogContent>
