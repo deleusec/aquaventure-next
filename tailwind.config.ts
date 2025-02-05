@@ -10,7 +10,7 @@ export default {
   theme: {
   	extend: {
   		colors: {
-  			background: 'hsl(var(--background))',
+  			background: 'var(--background)',
   			foreground: 'hsl(var(--foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
@@ -21,11 +21,15 @@ export default {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
+  				DEFAULT: 'var(--primary)',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
+  				DEFAULT: 'var(--secondary)',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			tertiary: {
+  				DEFAULT: 'var(--tertiary)',
   				foreground: 'hsl(var(--secondary-foreground))'
   			},
   			muted: {
@@ -51,6 +55,9 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			}
   		},
+		backgroundImage: {
+		  'gradient-primary': 'var(--gradient-primary)',
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

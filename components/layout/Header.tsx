@@ -4,9 +4,9 @@ import LogoHeader from "./logo-header";
 
 export default function Header() {
   return (
-    <header className="flex flex-row justify-between items-center gap-4 p-4">
-      <LogoHeader />
+    <header className="flex flex-row justify-between items-center gap-4 container mx-auto min-h-[75px] p-2">
       <NavHeader />
+      <LogoHeader />
       <ProfilePicture />
     </header>
   );
