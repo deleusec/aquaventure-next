@@ -37,8 +37,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import NewActivityModal from "@/components/activities/activitiesModal";
-import EditActivityModal from "@/components/activities/editActivities";
+import NewActivityModal from "@/components/activities/activities-modal";
+import EditActivityModal from "@/components/activities/edit-activities";
 
 
 type ActivityWithType = Activity & {

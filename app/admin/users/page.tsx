@@ -1,4 +1,4 @@
-import UserTable from "@/components/users/UserTable";
+import UserTable from "@/components/users/user-table";
 export default async function AdminUsersPage() {
   return (
     <div className="space-y-4">

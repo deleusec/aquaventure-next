@@ -1,7 +1,7 @@
 "use client";
 
-import ActivitiesList from "@/components/activities/activitiesList";
-import ActivityTypesList from "@/components/activities/activitiesTypeList";
+import ActivitiesList from "@/components/activities/activities-list";
+import ActivityTypesList from "@/components/activities/activities-type-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ActivitiesAdmin() {

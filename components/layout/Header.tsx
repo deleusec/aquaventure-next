@@ -1,6 +1,6 @@
 import Image from "next/image";
-import NavHeader from "./NavHeader";
-import ProfilePicture from "../profile/ProfilePicture";
+import NavHeader from "./nav-header";
+import ProfilePicture from "../profile/profile-picture";
 
 export default function Header() {
   return (
