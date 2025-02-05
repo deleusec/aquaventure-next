@@ -1,24 +1,59 @@
-import prisma from "@/lib/prisma"; 
-import ActivityDetails from "@/components/activities/details"; 
+"use client";
 
-async function getActivity(id: string) {
-  try {
-    const activity = await prisma.activity.findUnique({
-      where: { id: parseInt(id) },
-      include: { activityType: true },
-    });
-    return activity;
-  } catch (error) {
-    throw new Error("Erreur lors de la récupération de l'activité");
+import { Activity, ActivityType } from "@prisma/client";
+import { useState, useEffect } from "react";
+import ActivityDetails from "@/components/activities/details";
+import { useParams } from "next/navigation";
+import { Suspense } from "react";
+
+export type ActivityWithType = Activity & {
+  activityType: ActivityType;
+};
+
+export default function ActivityPage() {
+  const [activity, setActivity] = useState<ActivityWithType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams();
+
+  useEffect(() => {
+    const fetchActivity = async () => {
+      try {
+        if (id) {
+          const res = await fetch(`/api/activities/${id}`);
+          if (!res.ok) {
+            throw new Error("Erreur lors de la récupération de l'activité");
+          }
+          const data = await res.json();
+          setActivity(data);
+        } else {
+          throw new Error("ID de l'activité manquant");
+        }
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivity();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div>Chargement...</div>
+      </div>
+    );
   }
-}
 
-export default async function ActivityPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const activity = await getActivity(params.id);
+  if (error) {
+    return (
+      <div className="container py-8">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   if (!activity) {
     return (
@@ -29,8 +64,10 @@ export default async function ActivityPage({
   }
 
   return (
-    <div className="container py-8">
-      <ActivityDetails activity={activity} />
-    </div>
+    <Suspense fallback={<div>Chargement...</div>}>
+      <div className="container py-8">
+        <ActivityDetails activity={activity} />
+      </div>
+    </Suspense>
   );
 }

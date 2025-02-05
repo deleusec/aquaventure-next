@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ReservationDialog from "@/components/bookings/dialog";
+import ReservationDialog from "@/components/bookings/popup-bookings";
 import { Activity, ActivityType } from "@prisma/client";
 import { formatDate, formatTime } from "@/lib/utils";
 
