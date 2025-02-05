@@ -10,7 +10,7 @@ export default function DiscoverHome() {
           width={500}
           height={500}
           alt="Coral with fish"
-          className="object-contain max-h-72 sm:max-h-96 xl:max-h-[500px] w-auto rounded-lg"
+          className="object-contain max-h-72 sm:max-h-96 xl:max-h-[500px] w-auto rounded-lg min-h-[300px] xl:min-h-[500px]"
         />
       </div>
 
