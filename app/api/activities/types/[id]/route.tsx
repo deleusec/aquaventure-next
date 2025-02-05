@@ -41,3 +41,32 @@ export async function DELETE(
     );
   }
 }
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const data = await request.json();
+
+    const type = await prisma.activityType.update({
+      where: { id },
+      data: { name: data.name },
+      include: {
+        _count: {
+          select: {
+            activities: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(type);
+  } catch (error) {
+    console.error("Erreur de modification:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la modification" },
+      { status: 500 }
+    );
+  }
+}

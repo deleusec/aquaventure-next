@@ -45,6 +45,10 @@ interface ActivityTypeWithCount extends ActivityType {
 
 export default function ActivityTypesList() {
   const [types, setTypes] = useState<ActivityTypeWithCount[]>([]);
+  const [editingType, setEditingType] = useState<ActivityTypeWithCount | null>(
+    null
+  );
+  const [editTypeName, setEditTypeName] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -53,6 +57,31 @@ export default function ActivityTypesList() {
   const [isNewTypeDialogOpen, setIsNewTypeDialogOpen] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const handleEditType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/activities/types/${editingType?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editTypeName }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      await fetchTypes();
+      setEditingType(null);
+      setEditTypeName("");
+    } catch (error) {
+      console.error("Erreur lors de la modification:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (editingType) {
+      setEditTypeName(editingType.name);
+    }
+  }, [editingType]);
 
   useEffect(() => {
     fetchTypes();
@@ -151,13 +180,22 @@ export default function ActivityTypesList() {
                     <TableCell>{type.name}</TableCell>
                     <TableCell>{type._count?.activities ?? 0}</TableCell>
                     <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setDeleteId(type.id)}
-                      >
-                        Supprimer
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingType(type)}
+                        >
+                          Modifier
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteId(type.id)}
+                        >
+                          Supprimer
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -223,6 +261,38 @@ export default function ActivityTypesList() {
         </div>
       </div>
 
+      <Dialog
+        open={editingType !== null}
+        onOpenChange={(open) => !open && setEditingType(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le Type d'Activité</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditType} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="editName">Nom du type</Label>
+              <Input
+                id="editName"
+                value={editTypeName}
+                onChange={(e) => setEditTypeName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingType(null)}
+              >
+                Annuler
+              </Button>
+              <Button type="submit">Enregistrer</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
       {/* Dialog pour créer un nouveau type */}
       <Dialog open={isNewTypeDialogOpen} onOpenChange={setIsNewTypeDialogOpen}>
         <DialogContent>
