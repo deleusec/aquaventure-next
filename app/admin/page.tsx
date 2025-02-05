@@ -14,7 +14,7 @@ export default function ActivitiesAdmin() {
       <Tabs defaultValue="activities" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="activities">Activités</TabsTrigger>
-          <TabsTrigger value="types">Types d'activités</TabsTrigger>
+          <TabsTrigger value="types">Types d&apos;activités</TabsTrigger>
         </TabsList>
         <TabsContent value="activities" className="mt-6">
           <ActivitiesList />
