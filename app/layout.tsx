@@ -8,7 +8,7 @@ const montserratSans = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "🫧 Aquaventure",
+  title: "AquaVenture",
   description: "Vivez l'aventure sous-marine"
 };
 

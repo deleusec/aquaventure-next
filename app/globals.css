@@ -37,32 +37,40 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    --av-pink: #940D60;
     --av-blue: #0333D8;
+    --av-blue-light: #1A4BFF;
+    --av-pink: #940D60;
+    --av-pink-light: #FF2E8B;
     --av-yellow: #CEA13A;
+    --av-yellow-light: #FFD700;
+
+    --white: #FFFFFF;
+    --black: #000000;
 
     --gradient-primary: linear-gradient(135deg, var(--av-pink), var(--av-blue));
   }
   .dark {
     --background: #0C1020;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --background-lighter: #0E1323;
+    --background-darker: #0A0E17;
+    --foreground: #F5F5F5;
+    --card: var(--background-lighter);
+    --card-foreground: var(--foreground);
+    --popover: var(--background-lighter);
+    --popover-foreground: var(--foreground);
     --primary: var(--av-blue);
-    --primary-foreground: 220.9 39.3% 11%;
+    --primary-foreground: var(--white);
     --secondary: var(--av-pink);
-    --secondary-foreground: 210 20% 98%;
+    --secondary-foreground: var(--white);
     --tertiary: var(--av-yellow);
-    --tertiary-foreground: 210 20% 98%;
+    --tertiary-foreground: var(--white);
     --muted: 215 27.9% 16.9%;
     --muted-foreground: 217.9 10.6% 64.9%;
     --accent: 215 27.9% 16.9%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
+    --border: var(--background-darker);
     --input: 215 27.9% 16.9%;
     --ring: 216 12.2% 83.9%;
     --chart-1: 220 70% 50%;
@@ -80,10 +88,19 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-@layer utilities {
-  .container {
-    @apply mx-auto px-4;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+  h1 {
+    @apply text-7xl font-bold;
+  }
+  h2 {
+    @apply text-3xl;
+  }
+  h3 {
+    @apply text-base;
+  }
+  p {
+    @apply text-base font-light;
   }
 }

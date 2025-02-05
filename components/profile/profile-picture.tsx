@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,7 @@ export default function ProfilePicture() {
 
   return (
     <div className="flex-1 flex items-center justify-end relative">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer">
             <Image
@@ -35,7 +35,7 @@ export default function ProfilePicture() {
           </div>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="absolute right-0">
             <DropdownMenuItem onClick={() => router.push("/profile")}>
                 Profile
             </DropdownMenuItem>
