@@ -31,6 +31,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(activity);
   } catch (error) {
+    console.log("Erreur de création:", error);
     return NextResponse.json(
       { error: "Erreur lors de la création" },
       { status: 500 }
@@ -62,6 +63,7 @@ export async function GET(request: Request) {
         },
         include: {
           activityType: true,
+          media: true,
         },
         orderBy: {
           startDateTime: "desc",

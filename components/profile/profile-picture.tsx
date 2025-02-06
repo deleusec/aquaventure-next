@@ -24,6 +24,7 @@ export default function ProfilePicture() {
   };
 
   const profileImage = user?.media?.[0]?.url || "/avatar-placeholder.png";
+  const role = user?.role;
 
   return (
     <div className="flex-1 flex items-center justify-end relative">
@@ -48,6 +49,11 @@ export default function ProfilePicture() {
             <DropdownMenuItem onClick={() => router.push("/profile")}>
                 Profile
             </DropdownMenuItem>
+            {role === "admin" && (
+              <DropdownMenuItem onClick={() => router.push("/admin")}>
+                Admin
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               color="danger"
               className="text-destructive"

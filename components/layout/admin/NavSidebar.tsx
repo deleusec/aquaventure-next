@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, Settings, Users } from "lucide-react";
+import { Activity, Home, Settings, Users } from "lucide-react";
 
 interface SidebarLink {
   title: string;
@@ -16,17 +16,22 @@ interface SidebarLink {
 
 const sidebarLinks: SidebarLink[] = [
   {
-    title: "Activités",
-    icon: <Activity className="w-4 h-4" />,
+    title: "Dashboard",
+    icon: <Home className="w-4 h-4" />,
     href: "/admin/",
   },
   {
-    title: "Utilisateurs",
+    title: "Activities",
+    icon: <Activity className="w-4 h-4" />,
+    href: "/admin/activities",
+  },
+  {
+    title: "Users",
     icon: <Users className="w-4 h-4" />,
     href: "/admin/users",
   },
   {
-    title: "Paramètres",
+    title: "Settings",
     icon: <Settings className="w-4 h-4" />,
     href: "/admin/settings",
   },

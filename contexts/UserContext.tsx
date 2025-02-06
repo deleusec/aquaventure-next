@@ -7,6 +7,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  role: string;
   media?: { url: string }[];
   initializeUser: () => void;
 }

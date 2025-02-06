@@ -169,7 +169,7 @@ export default function ActivityTypesList() {
           <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
             <TableRow>
               <TableHead>Nom</TableHead>
-              <TableHead>Nombre d'activités</TableHead>
+              <TableHead>Nombre d&apos;activités</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -202,7 +202,7 @@ export default function ActivityTypesList() {
             ) : (
               <TableRow>
                 <TableCell colSpan={3} className="text-center py-8">
-                  Aucun type d'activité trouvé
+                  Aucun type d&apos;activité trouvé
                 </TableCell>
               </TableRow>
             )}
@@ -213,7 +213,7 @@ export default function ActivityTypesList() {
       <div className="border-t border-x border-b bg-background p-4 rounded-t-none rounded-b-lg">
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            {totalItems} type{totalItems > 1 ? "s" : ""} d'activité
+            {totalItems} type{totalItems > 1 ? "s" : ""} d&apos;activité
           </div>
           <div className="flex items-center space-x-6 lg:space-x-8">
             <div className="flex items-center space-x-2">
@@ -268,7 +268,7 @@ export default function ActivityTypesList() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modifier le Type d'Activité</DialogTitle>
+            <DialogTitle>Modifier le Type d&apos;Activité</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditType} className="space-y-4">
             <div className="space-y-2">
@@ -298,7 +298,7 @@ export default function ActivityTypesList() {
       <Dialog open={isNewTypeDialogOpen} onOpenChange={setIsNewTypeDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Nouveau Type d'Activité</DialogTitle>
+            <DialogTitle>Nouveau Type d&apos;Activité</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreateType} className="space-y-4">
             <div className="space-y-2">
