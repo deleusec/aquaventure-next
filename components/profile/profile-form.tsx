@@ -5,16 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Image from "next/image";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<{
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    media?: { url: string }[];
-  } | null>(null);
-
+  const { user, updateUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "" });
   const [error, setError] = useState("");
@@ -23,29 +17,15 @@ export default function ProfilePage() {
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
-        if (res.ok) {
-          setUser(data);
-          setForm({
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-          });
-          setPreviewImage(data.media?.[0]?.url || "/avatar-placeholder.png");
-        } else {
-          setError(data.error || "Failed to load user data.");
-        }
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError("An error occurred while fetching user data.");
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (user) {
+      setForm({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+      setPreviewImage(user.media?.[0]?.url || "/avatar-placeholder.png");
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -79,9 +59,10 @@ export default function ProfilePage() {
       const data = await res.json();
 
       if (res.ok) {
-        setUser(data.user);
+        updateUser(data.user); // Met à jour le `UserContext`
         setIsEditing(false);
         setIsImageDialogOpen(false);
+        setSelectedImage(null); // Réinitialiser l'image sélectionnée
       } else {
         setError(data.error || "Failed to update profile.");
       }
@@ -105,7 +86,7 @@ export default function ProfilePage() {
           <DialogTrigger asChild>
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary cursor-pointer hover:opacity-80 transition">
               <Image
-                src={previewImage || "/avatar-placeholder.png"}
+                src={user.media?.[0]?.url || "/avatar-placeholder.png"}
                 alt="Profile Picture"
                 layout="fill"
                 objectFit="cover"
