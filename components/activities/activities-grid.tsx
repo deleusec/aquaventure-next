@@ -33,7 +33,7 @@ export default function ActivityTypesGrid() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {activityTypes.length > 0 ? (
+      {activityTypes && activityTypes.length > 0 ? (
         activityTypes.map((type) => (
           <Card
             key={type.id}
