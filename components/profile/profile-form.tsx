@@ -3,18 +3,29 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import { useUser } from "@/contexts/UserContext";
+import { logout } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { user, updateUser } = useUser();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "" });
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -38,7 +49,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     setError("");
 
@@ -62,13 +75,31 @@ export default function ProfilePage() {
         updateUser(data.user);
         setIsEditing(false);
         setIsImageDialogOpen(false);
-        setSelectedImage(null); 
+        setSelectedImage(null);
       } else {
         setError(data.error || "Failed to update profile.");
       }
     } catch (err) {
       console.error("Error updating profile:", err);
       setError("An error occurred while updating your profile.");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const res = await fetch(`/api/auth/me`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        logout();
+        router.push("/login");
+      } else {
+        setError("Failed to delete account.");
+      }
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      setError("An error occurred while deleting your account.");
     }
   };
 
@@ -109,10 +140,19 @@ export default function ProfilePage() {
                   className="object-cover w-full h-full"
                 />
               </div>
-              <Input type="file" accept="image/*" onChange={handleImageChange} />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
             </div>
             <DialogFooter>
-              <Button variant="secondary" onClick={() => setIsImageDialogOpen(false)}>Cancel</Button>
+              <Button
+                variant="secondary"
+                onClick={() => setIsImageDialogOpen(false)}
+              >
+                Cancel
+              </Button>
               <Button onClick={handleSubmit}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
@@ -120,12 +160,36 @@ export default function ProfilePage() {
 
         {isEditing ? (
           <form onSubmit={handleSubmit} className="space-y-4 w-full">
-            <Input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required />
-            <Input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required />
-            <Input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+            <Input
+              name="firstName"
+              placeholder="First Name"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              name="lastName"
+              placeholder="Last Name"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
 
             <div className="flex justify-between gap-4">
-              <Button type="button" variant="secondary" onClick={() => setIsEditing(false)} className="w-full">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsEditing(false)}
+                className="w-full"
+              >
                 Cancel
               </Button>
               <Button type="submit" className="w-full">
@@ -135,12 +199,41 @@ export default function ProfilePage() {
           </form>
         ) : (
           <div className="space-y-4 text-center w-full">
-            <p><strong>First Name:</strong> {user.firstName}</p>
-            <p><strong>Last Name:</strong> {user.lastName}</p>
-            <p><strong>Email:</strong> {user.email}</p>
+            <p>
+              <strong>First Name:</strong> {user.firstName}
+            </p>
+            <p>
+              <strong>Last Name:</strong> {user.lastName}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
             <Button onClick={() => setIsEditing(true)} className="w-full">
               Edit Profile
             </Button>
+
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="w-full">Delete Account</Button>
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    Are you sure you want to delete your account?
+                  </DialogTitle>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setDeleteDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" onClick={handleDelete}>Delete Account</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </div>
