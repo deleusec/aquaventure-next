@@ -22,7 +22,7 @@ export default function NavHeader() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/activities", label: "Activities" },
-    { href: "/my-bookings", label: "My Bookings" },
+    { href: "/bookings", label: "My Bookings" },
   ];
 
   return (
