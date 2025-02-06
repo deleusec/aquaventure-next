@@ -39,12 +39,16 @@ export default function Activities() {
       try {
         const res = await fetch("/api/activities/types");
         const data = await res.json();
-        // Transform activity types to match MultiSelect options format
-        const transformedTypes = data.items.map((type: ActivityType) => ({
-          value: type.id.toString(),
-          label: type.name,
-        }));
-        setActivityTypes(transformedTypes);
+
+        if (data && data.items) {
+            const transformedTypes = data.items.map((type: ActivityType) => ({
+              value: type.id.toString(),
+              label: type.name,
+            }));
+            setActivityTypes(transformedTypes);
+        }else {
+          setActivityTypes([]);
+        }
       } catch (error) {
         console.error("Erreur de récupération des types:", error);
       }
