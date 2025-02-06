@@ -97,7 +97,7 @@ export default function LoginPage() {
             </a>
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" variant="primary" className="w-full">
             Se connecter
           </Button>
 

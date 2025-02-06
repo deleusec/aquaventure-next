@@ -1,4 +1,3 @@
-import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
 
 export default function AppLayout({
@@ -9,8 +8,9 @@ export default function AppLayout({
   return (
     <>
       <Header />
-      <main className="container mx-auto flex-1">{children}</main>
-      <Footer />
+      <main className="container mx-auto p-2 flex flex-col justify-between items-center">
+        {children}
+      </main>
     </>
   );
 }
