@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
 
     
     if (pathname.startsWith("/admin") && session.role !== "ADMIN") {
-        return NextResponse.redirect(`${origin}/unauthorized`);
+        return NextResponse.redirect(`${origin}/login`);
     }
 
     return NextResponse.next();
