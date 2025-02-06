@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth";
+import { LogOutIcon } from "lucide-react";
 
 export default function ProfilePicture() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function ProfilePicture() {
 
   return (
     <div className="flex-1 flex items-center justify-end relative">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer">
             <Image
@@ -35,14 +36,16 @@ export default function ProfilePicture() {
           </div>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="absolute right-0">
             <DropdownMenuItem onClick={() => router.push("/profile")}>
                 Profile
             </DropdownMenuItem>
             <DropdownMenuItem
-            color="danger"
+              color="danger"
+              className="text-destructive"
               onClick={handleLogout}
             >
+              <LogOutIcon className="w-5 h-5" />
               Logout
             </DropdownMenuItem>
         </DropdownMenuContent>

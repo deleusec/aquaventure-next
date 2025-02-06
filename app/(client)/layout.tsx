@@ -8,7 +8,9 @@ export default function AppLayout({
   return (
     <>
       <Header />
-      <main className="container mx-auto min-h-[calc(100vh-75px)]">{children}</main>
+      <main className="container mx-auto p-2 flex flex-col justify-between items-center">
+        {children}
+      </main>
     </>
   );
 }
