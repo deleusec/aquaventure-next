@@ -156,7 +156,7 @@ export default function ActivitiesList() {
                 <TableRow key={activity.id}>
                   <TableCell className="w-20">
                     <Image
-                      src={activity.media[0].url || "/default-activity.png"}
+                      src={activity.media?.[0]?.url ?? "/default-activity.png"}
                       alt="Activity Image"
                       width={50}
                       height={50}
