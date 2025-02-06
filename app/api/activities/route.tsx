@@ -73,6 +73,7 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
+  const showOutdated = searchParams.get("showOutdated") === "true";
   const activityTypeIds = searchParams
     .getAll("activityTypeIds")
     .map((id) => parseInt(id))
@@ -93,8 +94,7 @@ export async function GET(request: Request) {
   try {
     const whereClause = {
       name: { contains: search },
-      outdated: false,
-      availableSpots: { gt: 0 },
+      ...(showOutdated ? {} : { outdated: false, availableSpots: { gt: 0 } }),
       ...(activityTypeIds.length > 0 && {
         activityTypeId: { in: activityTypeIds },
       }),
@@ -103,11 +103,7 @@ export async function GET(request: Request) {
     const [total, items] = await Promise.all([
       prisma.activity.count({ where: whereClause }),
       prisma.activity.findMany({
-        where: {
-          name: {
-            contains: search,
-          },
-        },
+        where: whereClause,
         include: {
           activityType: true,
           media: true,
@@ -122,7 +118,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ items, total });
   } catch (error) {
-    console.error("Erreur de récupération:", error);
+    console.error("Erreur:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération" },
       { status: 500 }

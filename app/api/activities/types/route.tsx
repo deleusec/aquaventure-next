@@ -2,12 +2,21 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// app/api/activities/types/route.ts
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const showAvailable = searchParams.get("showAvailable") === "true";
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const search = searchParams.get("search") || "";
 
-export async function GET() {
+  const skip = (page - 1) * limit;
+
   try {
-    // On récupère uniquement les types qui ont des activités actives et disponibles
-    const activityTypes = await prisma.activityType.findMany({
-      where: {
+    // Condition pour filtrer les types selon disponibilité
+    const whereClause = {
+      name: { contains: search },
+      ...(showAvailable && {
         activities: {
           some: {
             AND: [
@@ -17,36 +26,51 @@ export async function GET() {
             ]
           }
         }
-      },
-      include: {
-        // On inclut le count des activités disponibles pour chaque type
-        activities: {
-          where: {
-            AND: [
-              { outdated: false },
-              { availableSpots: { gt: 0 } },
-              { startDateTime: { gt: new Date() } }
-            ]
+      })
+    };
+
+    const [total, items] = await Promise.all([
+      prisma.activityType.count({
+        where: whereClause
+      }),
+      prisma.activityType.findMany({
+        where: whereClause,
+        ...(showAvailable && {
+          include: {
+            _count: {
+              select: {
+                activities: {
+                  where: {
+                    outdated: false,
+                    availableSpots: { gt: 0 },
+                    startDateTime: { gt: new Date() }
+                  }
+                }
+              }
+            }
           }
-        }
-      },
-      orderBy: {
-        name: "asc"
-      }
+        }),
+        orderBy: { name: "asc" },
+        skip,
+        take: limit
+      })
+    ]);
+
+    const formattedItems = showAvailable 
+      ? items.map(type => ({
+          ...type,
+          availableActivitiesCount: type._count.activities
+        }))
+      : items;
+
+    return NextResponse.json({ 
+      items: formattedItems,
+      total 
     });
-
-    // On formate la réponse pour inclure le nombre d'activités disponibles
-    const formattedTypes = activityTypes.map(type => ({
-      id: type.id,
-      name: type.name,
-      availableActivitiesCount: type.activities.length
-    }));
-
-    return NextResponse.json(formattedTypes);
   } catch (error) {
-    console.error("Erreur de récupération des types:", error);
+    console.error("Erreur:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des types" },
+      { error: "Erreur lors de la récupération" },
       { status: 500 }
     );
   }
