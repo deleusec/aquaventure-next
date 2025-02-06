@@ -51,8 +51,8 @@ body {
   }
   .dark {
     --background: #0C1020;
-    --background-lighter: #0E1323;
-    --background-darker: #0A0E17;
+    --background-lighter: #1A2453;
+    --background-darker: #00051D;
     --foreground: var(--white);
     --card: var(--background-lighter);
     --card-foreground: var(--foreground);

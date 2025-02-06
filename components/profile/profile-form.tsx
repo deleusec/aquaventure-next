@@ -59,10 +59,10 @@ export default function ProfilePage() {
       const data = await res.json();
 
       if (res.ok) {
-        updateUser(data.user); // Met à jour le `UserContext`
+        updateUser(data.user);
         setIsEditing(false);
         setIsImageDialogOpen(false);
-        setSelectedImage(null); // Réinitialiser l'image sélectionnée
+        setSelectedImage(null); 
       } else {
         setError(data.error || "Failed to update profile.");
       }
