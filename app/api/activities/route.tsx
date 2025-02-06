@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -42,39 +43,45 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
+  const activityTypeIds = searchParams
+    .getAll("activityTypeIds")
+    .map((id) => parseInt(id))
+    .filter((id) => !isNaN(id));
 
   const skip = (page - 1) * limit;
+  const now = new Date();
+
+  // Mise à jour des activités expirées
+  await prisma.activity.updateMany({
+    where: {
+      startDateTime: { lt: now },
+      outdated: false,
+    },
+    data: { outdated: true },
+  });
 
   try {
-    const [total, items] = await Promise.all([
-      prisma.activity.count({
-        where: {
-          name: {
-            contains: search,
-          },
-        },
+    const whereClause = {
+      name: { contains: search },
+      outdated: false,
+      availableSpots: { gt: 0 },
+      ...(activityTypeIds.length > 0 && {
+        activityTypeId: { in: activityTypeIds },
       }),
+    };
+
+    const [total, items] = await Promise.all([
+      prisma.activity.count({ where: whereClause }),
       prisma.activity.findMany({
-        where: {
-          name: {
-            contains: search,
-          },
-        },
-        include: {
-          activityType: true,
-        },
-        orderBy: {
-          startDateTime: "desc",
-        },
+        where: whereClause,
+        include: { activityType: true },
+        orderBy: { startDateTime: "desc" },
         skip,
         take: limit,
       }),
     ]);
 
-    return NextResponse.json({
-      items,
-      total,
-    });
+    return NextResponse.json({ items, total });
   } catch (error) {
     console.error("Erreur de récupération:", error);
     return NextResponse.json(

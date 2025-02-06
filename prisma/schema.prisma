@@ -49,6 +49,7 @@ model Activity {
   description    String?
   startDateTime  DateTime
   duration       Int 
+  outdated          Boolean       @default(false)
   reservations   Reservation[]
 
   activityType ActivityType @relation(fields: [activityTypeId], references: [id])
@@ -64,7 +65,6 @@ model Reservation {
   activityId       Int
   reservationDate  DateTime  @default(now())
   status           Boolean   @default(true) 
-  outdated         Boolean   @default(false)
 
   user     User     @relation(fields: [userId], references: [id])
   activity Activity @relation(fields: [activityId], references: [id])

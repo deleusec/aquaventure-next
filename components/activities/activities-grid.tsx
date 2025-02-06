@@ -1,43 +1,74 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ActivityCard from "./activity-card";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-interface Activity {
-  id: string;
+interface ActivityType {
+  id: number;
   name: string;
-  description: string;
-  availableSpots: number;
-  activityTypeId: number;
-  startDateTime: string;
-  duration: number;
-  activityType: {
-    id: number;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    activities: number;
   };
 }
 
-export default function ActivitiesGrid() {
-  const [activities, setActivities] = useState<Activity[]>([]);
+export default function ActivityTypesGrid() {
+  const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/activities?limit=8")
+    fetch("/api/activities/types?limit=8")
       .then((response) => response.json())
-      .then((data) => setActivities(data.items)) // ✅ Correction : on accède à data.items
-      .catch((error) => console.error("Error fetching activities:", error));
+      .then((data) => setActivityTypes(data.items))
+      .catch((error) => console.error("Error fetching activity types:", error));
   }, []);
+
+  const handleTypeClick = (typeId: number) => {
+    // Naviguer vers la page des activités avec un filtre par type
+    router.push(`/activities?activityTypeId=${typeId}`);
+  };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {activities.length > 0 ? (
-        activities.map((activity : Activity) => (
-          <ActivityCard key={activity.id} activity={activity} />
+      {activityTypes.length > 0 ? (
+        activityTypes.map((type) => (
+          <Card
+            key={type.id}
+            className="hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => handleTypeClick(type.id)}
+          >
+            <CardHeader>
+              <CardTitle>{type.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">
+                  Activités disponibles
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleTypeClick(type.id);
+                  }}
+                >
+                  Voir les activités
+                </Button>
+              </div>
+              <div className="mt-2 text-sm font-medium">
+                {type._count?.activities || 0} activité
+                {(type._count?.activities || 0) > 1 ? "s" : ""}
+              </div>
+            </CardContent>
+          </Card>
         ))
       ) : (
         <p className="text-center col-span-full text-gray-500">
-          No activities found.
+          Aucun type d'activité trouvé.
         </p>
       )}
     </div>

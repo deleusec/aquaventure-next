@@ -1,4 +1,3 @@
-// app/activities/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,27 +13,78 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { MultiSelect } from "@/components/activities/multi-select";
 
 type ActivityWithType = Activity & {
   activityType: ActivityType;
   startDateTime: Date | string;
 };
-
+type ActivityTypeOption = {
+  value: string;
+  label: string;
+};
 export default function Activities() {
   const [activities, setActivities] = useState<ActivityWithType[]>([]);
+  const [activityTypes, setActivityTypes] = useState<ActivityTypeOption[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
+  const searchParams = useSearchParams();
+
+  // Fetch activity types
+  useEffect(() => {
+    const fetchActivityTypes = async () => {
+      try {
+        const res = await fetch("/api/activities/types");
+        const data = await res.json();
+        // Transform activity types to match MultiSelect options format
+        const transformedTypes = data.items.map((type: ActivityType) => ({
+          value: type.id.toString(),
+          label: type.name,
+        }));
+        setActivityTypes(transformedTypes);
+      } catch (error) {
+        console.error("Erreur de récupération des types:", error);
+      }
+    };
+
+    fetchActivityTypes();
+  }, []);
 
   useEffect(() => {
     fetchActivities();
-  }, [search]);
+  }, [search, selectedTypes]);
 
   const fetchActivities = async () => {
     try {
-      const searchParams = new URLSearchParams();
-      if (search) searchParams.append("search", search);
-      const res = await fetch(`/api/activities?${searchParams.toString()}`);
+      const params = new URLSearchParams();
+
+      // Log pour déboguer
+      console.log("Search:", search);
+      console.log("Selected Types:", selectedTypes);
+
+      // Ajouter la recherche si présente
+      if (search) params.append("search", search);
+
+      // Ajouter les types sélectionnés
+      if (selectedTypes.length > 0) {
+        selectedTypes.forEach((typeId) => {
+          console.log("Appending activityTypeIds:", typeId);
+          params.append("activityTypeIds", typeId);
+        });
+      }
+
+      // Log de l'URL complète
+      const fullUrl = `/api/activities?${params.toString()}`;
+      console.log("Fetch URL:", fullUrl);
+
+      // Faire la requête
+      const res = await fetch(fullUrl);
       const data = await res.json();
+
+      console.log("Fetched data:", data);
       setActivities(data.items);
     } catch (error) {
       console.error("Erreur:", error);
@@ -60,13 +110,23 @@ export default function Activities() {
 
   return (
     <div className="container py-8">
-      <div className="mb-8">
+      <div className="mb-8 flex gap-4">
         <Input
           type="text"
           placeholder="Rechercher une activité..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="max-w-md"
+          className="max-w-md flex-grow"
+        />
+
+        <MultiSelect
+          options={activityTypes}
+          onValueChange={setSelectedTypes}
+          defaultValue={selectedTypes}
+          placeholder="Filtrer par type"
+          variant="inverted"
+          animation={0.5}
+          maxCount={3}
         />
       </div>
 

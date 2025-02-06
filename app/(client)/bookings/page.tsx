@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Info, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Calendar, Info, Trash2, CheckCircle2 } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -31,6 +31,7 @@ type BookingWithActivity = Reservation & {
     name: string;
     startDateTime: Date | string;
     duration: number;
+    outdated: boolean;
     activityType: {
       name: string;
     };
@@ -42,8 +43,7 @@ export default function Bookings() {
   const [bookings, setBookings] = useState<{
     upcoming: BookingWithActivity[];
     past: BookingWithActivity[];
-    cancelled: BookingWithActivity[];
-  }>({ upcoming: [], past: [], cancelled: [] });
+  }>({ upcoming: [], past: [] });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [cancellingBooking, setCancellingBooking] =
@@ -104,19 +104,12 @@ export default function Bookings() {
     fetchBookings();
   }, [search]);
 
-  const renderBookingCard = (
-    booking: BookingWithActivity,
-    type: "upcoming" | "past" | "cancelled"
-  ) => (
+  const renderBookingCard = (booking: BookingWithActivity, isPast: boolean) => (
     <Card key={booking.id} className="hover:shadow-lg transition-shadow">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           {booking.activity.name}
-          {type === "past" ? (
-            <CheckCircle2 className="h-5 w-5 text-green-500" />
-          ) : type === "cancelled" ? (
-            <XCircle className="h-5 w-5 text-red-500" />
-          ) : null}
+          {isPast && <CheckCircle2 className="h-5 w-5 text-green-500" />}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -137,7 +130,7 @@ export default function Bookings() {
           </span>
         </div>
       </CardContent>
-      {type === "upcoming" && (
+      {!isPast && (
         <CardFooter>
           <Button
             variant="destructive"
@@ -165,10 +158,9 @@ export default function Bookings() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-4">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="upcoming">Réservations à venir</TabsTrigger>
           <TabsTrigger value="past">Réservations passées</TabsTrigger>
-          <TabsTrigger value="cancelled">Réservations annulées</TabsTrigger>
         </TabsList>
 
         <TabsContent value="upcoming">
@@ -178,7 +170,7 @@ export default function Bookings() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bookings.upcoming.length > 0 ? (
                 bookings.upcoming.map((booking) =>
-                  renderBookingCard(booking, "upcoming")
+                  renderBookingCard(booking, false)
                 )
               ) : (
                 <div>Aucune réservation à venir</div>
@@ -193,27 +185,9 @@ export default function Bookings() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bookings.past.length > 0 ? (
-                bookings.past.map((booking) =>
-                  renderBookingCard(booking, "past")
-                )
+                bookings.past.map((booking) => renderBookingCard(booking, true))
               ) : (
                 <div>Aucune réservation passée</div>
-              )}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="cancelled">
-          {loading ? (
-            <div>Chargement...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bookings.cancelled.length > 0 ? (
-                bookings.cancelled.map((booking) =>
-                  renderBookingCard(booking, "cancelled")
-                )
-              ) : (
-                <div>Aucune réservation annulée</div>
               )}
             </div>
           )}

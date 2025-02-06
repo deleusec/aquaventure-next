@@ -68,7 +68,9 @@ export default function ActivitiesList() {
         search: search,
       });
 
-      const res = await fetch(`/api/activities?${searchParams.toString()}`);
+      const res = await fetch(
+        `/api/activities?showOutdated=true&${searchParams.toString()}`
+      );
       if (!res.ok) throw new Error("Erreur de chargement");
 
       const data = await res.json();

@@ -2,62 +2,91 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getSession();
 
   if (!session) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "10");
+  const search = searchParams.get("search") || "";
+  const activityTypeId = searchParams.get("activityTypeId")
+    ? parseInt(searchParams.get("activityTypeId") as string)
+    : undefined;
+
+  const skip = (page - 1) * limit;
+
+  const now = new Date();
+
+  // Mettre à jour les activités outdated
+  await prisma.activity.updateMany({
+    where: {
+      startDateTime: {
+        lt: now,
+      },
+      outdated: false,
+    },
+    data: {
+      outdated: true,
+    },
+  });
+
   try {
-    const now = new Date();
+    const whereCondition = {
+      userId: Number(session.id),
+      status: true,
+      activity: {
+        ...(activityTypeId && { activityTypeId }),
+        OR: [
+          {
+            name: {
+              contains: search,
+            },
+          },
+          {
+            activityType: {
+              name: {
+                contains: search,
+              },
+            },
+          },
+        ],
+      },
+    };
 
-    // Mettre à jour les réservations outdated
-    await prisma.reservation.updateMany({
-      where: {
-        userId: Number(session.id),
-        outdated: false,
-        activity: {
-          startDateTime: {
-            lt: now, // Activités dont la date est passée
+    const [total, items] = await Promise.all([
+      prisma.reservation.count({
+        where: whereCondition,
+      }),
+      prisma.reservation.findMany({
+        where: whereCondition,
+        include: {
+          activity: {
+            include: {
+              activityType: true,
+            },
           },
         },
-      },
-      data: {
-        outdated: true,
-      },
-    });
-
-    // Récupérer les réservations
-    const bookings = await prisma.reservation.findMany({
-      where: {
-        userId: Number(session.id),
-      },
-      include: {
-        activity: {
-          include: {
-            activityType: true,
-          },
-        },
-      },
-      orderBy: [
-        {
+        orderBy: {
           activity: {
             startDateTime: "desc",
           },
         },
-      ],
-    });
+        skip,
+        take: limit,
+      }),
+    ]);
 
     // Catégoriser les réservations
-    const categorizedBookings = bookings.reduce(
+    const categorizedBookings = items.reduce(
       (acc, booking) => {
-        if (booking.status && !booking.outdated) {
+        if (!booking.activity.outdated) {
           acc.upcoming.push(booking);
-        } else if (booking.outdated) {
-          acc.past.push(booking);
         } else {
-          acc.cancelled.push(booking);
+          acc.past.push(booking);
         }
 
         return acc;
@@ -65,18 +94,18 @@ export async function GET() {
       {
         upcoming: [],
         past: [],
-        cancelled: [],
       }
     );
 
     return NextResponse.json({
-      items: bookings,
+      items,
+      total,
       categorized: categorizedBookings,
     });
   } catch (error) {
-    console.error("Erreur lors de la récupération des réservations:", error);
+    console.error("Erreur de récupération:", error);
     return NextResponse.json(
-      { error: "Impossible de récupérer les réservations" },
+      { error: "Erreur lors de la récupération" },
       { status: 500 }
     );
   }
