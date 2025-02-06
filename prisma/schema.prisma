@@ -59,11 +59,12 @@ model Activity {
 }
 
 model Reservation {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  activityId      Int
-  reservationDate DateTime @default(now())
-  status          Boolean  @default(true)
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  activityId       Int
+  reservationDate  DateTime  @default(now())
+  status           Boolean   @default(true) 
+  outdated         Boolean   @default(false)
 
   user     User     @relation(fields: [userId], references: [id])
   activity Activity @relation(fields: [activityId], references: [id])
