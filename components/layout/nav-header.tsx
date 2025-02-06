@@ -54,7 +54,7 @@ export default function NavHeader() {
         </div>
         <div className="p-2 relative">
           <Link href="/my-bookings">My Bookings</Link>
-          {pathname === "/my-bookings" && (
+          {pathname === "/bookings" && (
             <Image
               src="/dot.svg"
               alt="Dot"
