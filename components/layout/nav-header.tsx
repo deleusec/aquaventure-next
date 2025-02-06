@@ -7,7 +7,7 @@ export default function NavHeader() {
     <nav className="flex-1 flex justify-center items-center gap-4">
       <Link href="/">Home</Link>
       <Link href="/activities">Activities</Link>
-      <Link href="/my-bookings">My Bookings</Link>
+      <Link href="/bookings">My Bookings</Link>
     </nav>
   );
 }
