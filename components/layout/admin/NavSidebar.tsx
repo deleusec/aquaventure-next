@@ -18,7 +18,7 @@ const sidebarLinks: SidebarLink[] = [
   {
     title: "Dashboard",
     icon: <Home className="w-4 h-4" />,
-    href: "/admin/",
+    href: "/admin",
   },
   {
     title: "Activities",
