@@ -1,43 +1,72 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { writeFile } from "fs/promises";
+import path from "path";
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const formData = await request.formData();
+    const name = formData.get("name") as string;
+    const activityTypeId = formData.get("activityTypeId") as string;
+    const availableSpots = formData.get("availableSpots") as string;
+    const description = formData.get("description") as string;
+    const startDateTime = formData.get("startDateTime") as string;
+    const duration = formData.get("duration") as string;
+    const imageFile = formData.get("image") as File | null;
 
-    if (
-      !data.name ||
-      !data.activityTypeId ||
-      !data.availableSpots ||
-      !data.startDateTime ||
-      !data.duration
-    ) {
+    // Vérification des données requises
+    if (!name || !activityTypeId || !availableSpots || !startDateTime || !duration) {
       return NextResponse.json(
         { error: "Données manquantes" },
         { status: 400 }
       );
     }
 
+    let imageUrl = null;
+
+    // Enregistrement de l'image si elle existe
+    if (imageFile) {
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const fileName = `${Date.now()}-${imageFile.name.replace(/\s/g, "_")}`;
+      const filePath = path.join(process.cwd(), "public/uploads", fileName);
+
+      await writeFile(filePath, buffer);
+      imageUrl = `/uploads/${fileName}`;
+    }
+
+    // Création de l'activité
     const activity = await prisma.activity.create({
       data: {
-        name: data.name,
-        activityTypeId: parseInt(data.activityTypeId),
-        availableSpots: parseInt(data.availableSpots),
-        description: data.description,
-        startDateTime: new Date(data.startDateTime),
-        duration: parseInt(data.duration),
+        name,
+        activityTypeId: parseInt(activityTypeId),
+        availableSpots: parseInt(availableSpots),
+        description,
+        startDateTime: new Date(startDateTime),
+        duration: parseInt(duration),
       },
     });
 
-    return NextResponse.json(activity);
+    // Enregistrement de l'image en base de données si elle existe
+    if (imageUrl) {
+      await prisma.media.create({
+        data: {
+          url: imageUrl,
+          type: "ACTIVITY",
+          activityId: activity.id,
+        },
+      });
+    }
+
+    return NextResponse.json({ message: "Activité créée", activity });
   } catch (error) {
-    console.log("Erreur de création:", error);
+    console.error("Erreur de création:", error);
     return NextResponse.json(
       { error: "Erreur lors de la création" },
       { status: 500 }
     );
   }
 }
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1");

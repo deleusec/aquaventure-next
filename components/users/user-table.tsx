@@ -173,7 +173,7 @@ export default function UsersAdmin() {
                     alt={`${user.firstName} ${user.lastName}`}
                     width={32}
                     height={32}
-                    className="rounded-full"
+                    className="object-cover h-8 w-8 rounded-full"
                   />
                 </TableCell>
                 <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
@@ -220,9 +220,10 @@ export default function UsersAdmin() {
                 <div className="relative w-12 h-12">
                   <Image
                     src={previewImage || "/default-avatar.png"}
+                    width={48}
+                    height={48}
                     alt="Avatar"
-                    layout="fill"
-                    className="rounded-full"
+                    className="object-cover h-12 w-12 rounded-full"
                   />
                 </div>
                 <Input

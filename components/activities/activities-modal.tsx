@@ -86,7 +86,7 @@ export default function ActivityModal({
         duration: activity.duration.toString(),
       });
 
-      setPreviewImage(activity.media?.url || "/default-activity.png");
+      setPreviewImage(activity.media[0].url || "/default-activity.png");
     } else {
       setFormData({
         name: "",
@@ -181,14 +181,17 @@ export default function ActivityModal({
           {/* Image Preview */}
           <div className="flex flex-col items-center gap-2">
             <Label>Image</Label>
-            <div className="relative w-32 h-32 rounded-md border">
+            <div className="relative rounded-md border">
+              {previewImage && (
               <Image
-                src={previewImage || "/default-activity.png"}
+                src={previewImage}
                 alt="Activity Image"
-                layout="fill"
+                width={100}
+                height={100}
                 objectFit="cover"
-                className="rounded-md"
+                className="rounded-md w-32 h-32 object-cover"
               />
+              )}
             </div>
             <Input type="file" accept="image/*" onChange={handleImageChange} />
           </div>

@@ -158,7 +158,7 @@ export default function ActivitiesList() {
                       alt="Activity Image"
                       width={50}
                       height={50}
-                      className="rounded-md object-cover"
+                      className="rounded-md object-cover w-10 h-10"
                     />
                   </TableCell>
                   <TableCell className="font-medium">{activity.name}</TableCell>
