@@ -1,8 +1,7 @@
-// app/admin/activities/components/activities-list.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Activity, ActivityType } from "@prisma/client";
+import { Activity, ActivityType, Media } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,13 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,12 +29,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import NewActivityModal from "@/components/activities/activities-modal";
-import EditActivityModal from "@/components/activities/edit-activities";
-
+import Image from "next/image";
+import ActivityModal from "./activities-modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 type ActivityWithType = Activity & {
   activityType: ActivityType;
+  media?: Media;
 };
 
 export default function ActivitiesList() {
@@ -54,10 +53,10 @@ export default function ActivitiesList() {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [isNewActivityModalOpen, setIsNewActivityModalOpen] = useState(false);
-  const [editActivity, setEditActivity] = useState<ActivityWithType | null>(
-    null
-  );
+  const [activityModal, setActivityModal] = useState<{
+    open: boolean;
+    activity: ActivityWithType | null;
+  }>({ open: false, activity: null });
 
   // Récupération des activités
   const fetchActivities = async () => {
@@ -74,7 +73,6 @@ export default function ActivitiesList() {
       if (!res.ok) throw new Error("Erreur de chargement");
 
       const data = await res.json();
-      // Vérification et initialisation avec des valeurs par défaut
       setActivities(data.items || []);
       setTotalItems(data.total || 0);
     } catch (error) {
@@ -133,7 +131,9 @@ export default function ActivitiesList() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Button onClick={() => setIsNewActivityModalOpen(true)}>
+        <Button
+          onClick={() => setActivityModal({ open: true, activity: null })}
+        >
           Nouvelle Activité
         </Button>
       </div>
@@ -142,6 +142,7 @@ export default function ActivitiesList() {
         <Table>
           <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
             <TableRow>
+              <TableHead>Image</TableHead>
               <TableHead>Nom</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Date et heure</TableHead>
@@ -153,6 +154,15 @@ export default function ActivitiesList() {
             {Array.isArray(activities) && activities.length > 0 ? (
               activities.map((activity) => (
                 <TableRow key={activity.id}>
+                  <TableCell className="w-20">
+                    <Image
+                      src={activity.media[0].url || "/default-activity.png"}
+                      alt="Activity Image"
+                      width={50}
+                      height={50}
+                      className="rounded-md object-cover w-10 h-10"
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{activity.name}</TableCell>
                   <TableCell>{activity.activityType.name}</TableCell>
                   <TableCell>{formatDate(activity.startDateTime)}</TableCell>
@@ -166,7 +176,9 @@ export default function ActivitiesList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => setEditActivity(activity)}
+                          onClick={() =>
+                            setActivityModal({ open: true, activity })
+                          }
                         >
                           <Pencil className="mr-2 h-4 w-4" />
                           Modifier
@@ -185,7 +197,7 @@ export default function ActivitiesList() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   Aucune activité trouvée
                 </TableCell>
               </TableRow>
@@ -246,20 +258,15 @@ export default function ActivitiesList() {
         </div>
       </div>
 
-      {/* Modales */}
-      <NewActivityModal
-        open={isNewActivityModalOpen}
-        onOpenChange={setIsNewActivityModalOpen}
+      {/* Modale de création/édition */}
+      <ActivityModal
+        open={activityModal.open}
+        activity={activityModal.activity}
+        onOpenChange={(open) => setActivityModal({ open, activity: null })}
         onSuccess={fetchActivities}
       />
 
-      <EditActivityModal
-        activity={editActivity}
-        open={editActivity !== null}
-        onOpenChange={(open) => !open && setEditActivity(null)}
-        onSuccess={fetchActivities}
-      />
-
+      {/* Modale de confirmation de suppression */}
       <AlertDialog
         open={deleteId !== null}
         onOpenChange={() => setDeleteId(null)}

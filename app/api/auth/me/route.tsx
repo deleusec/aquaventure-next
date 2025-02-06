@@ -35,3 +35,25 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE() {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await prisma.user.delete({
+      where: { id: Number(session.id) },
+    });
+
+    return NextResponse.json({ message: "User deleted" });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 }
+    );
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,8 @@ import { useUser } from "@/contexts/UserContext";
 export default function ProfilePicture() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { user, loading } = useUser();
+  const { user, loading, initializeUser } = useUser();
+
 
   const handleLogout = async () => {
     await logout();
@@ -24,6 +25,10 @@ export default function ProfilePicture() {
   };
 
   const profileImage = user?.media?.[0]?.url || "/avatar-placeholder.png";
+
+  useEffect(() => {
+    initializeUser();
+  }, []);
 
   return (
     <div className="flex-1 flex items-center justify-end relative">
@@ -48,6 +53,11 @@ export default function ProfilePicture() {
             <DropdownMenuItem onClick={() => router.push("/profile")}>
                 Profile
             </DropdownMenuItem>
+            {user?.role === "ADMIN" && (
+              <DropdownMenuItem onClick={() => router.push("/admin")}>
+                Admin
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               color="danger"
               className="text-destructive"

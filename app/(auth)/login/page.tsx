@@ -7,8 +7,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { loginSchema } from "@/schemas/authSchemas";
 import { z } from "zod";
+import { useUser } from "@/contexts/UserContext";
 
 export default function LoginPage() {
+  const { initializeUser } = useUser();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
@@ -24,6 +26,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setErrors({});
     setApiError("");
 
@@ -43,6 +46,8 @@ export default function LoginPage() {
         const data = await res.json();
         setApiError(data.error || "Erreur inconnue");
       }
+
+      initializeUser();
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors = {};

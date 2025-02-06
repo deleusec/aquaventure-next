@@ -39,6 +39,7 @@ model ActivityType {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  media     Media?
 }
 
 model Activity {
@@ -56,7 +57,7 @@ model Activity {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  media     Media[] 
+  media     Media[]
 }
 
 model Reservation {
@@ -76,18 +77,21 @@ model Reservation {
 enum MediaType {
   PROFILE
   ACTIVITY
+  ACTIVITY_TYPE
 }
 
 model Media {
-  id         Int      @id @default(autoincrement())
-  url        String
-  type       MediaType
-  userId     Int?     @unique
-  activityId Int?     @unique
+  id             Int       @id @default(autoincrement())
+  url            String
+  type           MediaType
+  userId         Int?      @unique
+  activityId     Int?      @unique
+  activityTypeId Int?      @unique
 
-  user       User?     @relation(fields: [userId], references: [id])
-  activity   Activity? @relation(fields: [activityId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+  activity     Activity?     @relation(fields: [activityId], references: [id])
+  activityType ActivityType? @relation(fields: [activityTypeId], references: [id])
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

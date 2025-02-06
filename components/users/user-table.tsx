@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 interface User {
   id: number;
@@ -49,6 +50,7 @@ interface User {
   lastName: string;
   email: string;
   role: string;
+  media: { url: string }[];
 }
 
 export default function UsersAdmin() {
@@ -56,6 +58,8 @@ export default function UsersAdmin() {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string>("");
   const [editFormData, setEditFormData] = useState({
     firstName: "",
     lastName: "",
@@ -75,6 +79,8 @@ export default function UsersAdmin() {
         email: editUser.email,
         role: editUser.role,
       });
+
+      setPreviewImage(editUser.media?.[0]?.url || "/default-avatar.png");
     }
   }, [editUser]);
 
@@ -113,13 +119,22 @@ export default function UsersAdmin() {
     if (!editUser) return;
 
     try {
+      const formData = new FormData();
+      formData.append("firstName", editFormData.firstName);
+      formData.append("lastName", editFormData.lastName);
+      formData.append("email", editFormData.email);
+      formData.append("role", editFormData.role);
+      if (selectedImage) {
+        formData.append("image", selectedImage);
+      }
+
       const res = await fetch(`/api/users/${editUser.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editFormData),
+        body: formData, // ✅ Envoi en FormData
       });
 
       if (!res.ok) throw new Error();
+
       fetchUsers();
       setEditUser(null);
     } catch (error) {
@@ -142,6 +157,7 @@ export default function UsersAdmin() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Image</TableHead>
               <TableHead>Nom</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Rôle</TableHead>
@@ -151,6 +167,15 @@ export default function UsersAdmin() {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
+                <TableCell>
+                  <Image
+                    src={user.media?.[0]?.url || "/default-avatar.png"}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    width={32}
+                    height={32}
+                    className="object-cover h-8 w-8 rounded-full"
+                  />
+                </TableCell>
                 <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.role}</TableCell>
@@ -189,6 +214,32 @@ export default function UsersAdmin() {
             <DialogTitle>Modifier l&apos;Utilisateur</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="image">Image</Label>
+              <div className="flex items-center space-x-4">
+                <div className="relative w-12 h-12">
+                  <Image
+                    src={previewImage || "/default-avatar.png"}
+                    width={48}
+                    height={48}
+                    alt="Avatar"
+                    className="object-cover h-12 w-12 rounded-full"
+                  />
+                </div>
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setSelectedImage(file);
+                      setPreviewImage(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="firstName">Prénom</Label>
               <Input
