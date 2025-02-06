@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function HeaderHome() {
   return (
     <div className="h-[calc(100vh-75px)] flex justify-center items-center">
-     
-     <Image
+      <Image
         src="/gradient_1.svg"
         width={600}
         height={600}
@@ -33,11 +33,11 @@ export default function HeaderHome() {
             unforgettable underwater adventures!
           </p>
           <div className="flex justify-start items-center w-full gap-4">
-            <Button variant="primary" size="lg">
-              Get Started
+            <Button variant="primary" size="lg" asChild>
+              <Link href="/activities">Explore</Link>
             </Button>
-            <Button variant="default" size="lg">
-              Get Started
+            <Button variant="default" size="lg" asChild>
+              <Link href="/bookings">My Bookings</Link>
             </Button>
           </div>
         </div>

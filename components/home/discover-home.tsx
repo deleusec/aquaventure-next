@@ -10,12 +10,12 @@ export default function DiscoverHome() {
           width={500}
           height={500}
           alt="Coral with fish"
-          className="object-contain max-h-72 sm:max-h-96 xl:max-h-[500px] w-auto rounded-lg min-h-[300px] xl:min-h-[500px]"
+          className="object-contain max-h-72 sm:max-h-96 xl:max-h-[550px] w-auto rounded-lg min-h-[300px] xl:min-h-[450px]"
         />
       </div>
 
       <div className="flex-1 flex justify-center items-center p-4 xl:p-8 w-full">
-        <div className="flex flex-col gap-4 max-w-3xl text-center xl:text-left">
+        <div className="flex flex-col gap-4 max-w-3xl text-left">
           <h2 className="text-primary-foreground">
             Discover the beauty of the ocean and the wonders that lie beneath the waves.
           </h2>
@@ -27,7 +27,7 @@ export default function DiscoverHome() {
               { title: "Learn", description: "Learn about the fascinating creatures that inhabit the ocean and the importance of protecting our marine ecosystems." },
             ].map((item, index) => (
               <li key={index} className="flex flex-col gap-1">
-                <div className="flex items-center justify-center xl:justify-start gap-1">
+                <div className="flex items-center justify-start gap-1">
                   <Image
                     src="/dot.svg"
                     width={8}

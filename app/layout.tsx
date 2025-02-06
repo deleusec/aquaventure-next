@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { UserProvider } from "@/contexts/UserContext";
 
 const montserratSans = Montserrat({
   variable: "--montserrat",
@@ -9,7 +10,7 @@ const montserratSans = Montserrat({
 
 export const metadata: Metadata = {
   title: "AquaVenture",
-  description: "Vivez l'aventure sous-marine"
+  description: "Vivez l'aventure sous-marine",
 };
 
 export default function RootLayout({
@@ -18,12 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${montserratSans.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <UserProvider>
+      <html lang="en" className="dark">
+        <body className={`${montserratSans.variable} antialiased`}>
+          {children}
+        </body>
+      </html>
+    </UserProvider>
   );
 }

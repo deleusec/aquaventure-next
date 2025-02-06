@@ -11,28 +11,36 @@ import {
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth";
 import { LogOutIcon } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProfilePicture() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { user, loading } = useUser();
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
 
+  const profileImage = user?.media?.[0]?.url || "/avatar-placeholder.png";
+
   return (
     <div className="flex-1 flex items-center justify-end relative">
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer">
-            <Image
-              src="/profile.jpg"
-              alt="Profile picture"
-              width={40}
-              height={40}
-              className="object-cover w-full h-full"
-            />
+          {!loading ? (
+              <Image
+                src={profileImage}
+                alt="Profile picture"
+                width={40}
+                height={40}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 animate-pulse" />
+            )}
           </div>
         </DropdownMenuTrigger>
 
