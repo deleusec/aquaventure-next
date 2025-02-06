@@ -54,7 +54,7 @@ body {
     --background-lighter: #1A2453;
     --background-darker: #00051D;
     --foreground: var(--white);
-    --card: var(--background-lighter);
+    --card: var(--background-darker);
     --card-foreground: var(--foreground);
     --popover: var(--background-darker);
     --popover-foreground: var(--foreground);
@@ -64,13 +64,13 @@ body {
     --secondary-foreground: var(--foreground);
     --tertiary: var(--av-yellow);
     --tertiary-foreground: var(--foreground);
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: #2D3748;
+    --muted-foreground: var(--foreground);
     --accent: var(--background-lighter);
     --accent-foreground: var(--foreground);
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-    --border: var(--background-darker);
+    --border: var(--muted);
     --input: 215 27.9% 16.9%;
     --ring: 216 12.2% 83.9%;
     --chart-1: 220 70% 50%;

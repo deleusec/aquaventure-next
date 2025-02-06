@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface User {
   id: number;
@@ -8,12 +8,14 @@ interface User {
   lastName: string;
   email: string;
   media?: { url: string }[];
+  initializeUser: () => void;
 }
 
 interface UserContextType {
   user: User | null;
   loading: boolean;
   updateUser: (updatedUser: User) => void;
+  initializeUser: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,30 +24,30 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
-        if (res.ok) {
-          setUser(data);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data);
       }
-    };
-
-    fetchUser();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateUser = (updatedUser: User) => {
     setUser(updatedUser);
   };
 
+  const initializeUser = () => {
+    fetchUser();
+  };
+
   return (
-    <UserContext.Provider value={{ user, loading, updateUser }}>
+    <UserContext.Provider value={{ user, loading, updateUser, initializeUser }}>
       {children}
     </UserContext.Provider>
   );
