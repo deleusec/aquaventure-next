@@ -60,7 +60,7 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {["firstname", "lastname", "email", "password"].map((field, index) => (
+          {["firstName", "lastname", "email", "password"].map((field, index) => (
             <div key={index}>
               <Input
                 name={field}
@@ -76,7 +76,7 @@ export default function RegisterPage() {
             </div>
           ))}
 
-          <Button type="submit" className="w-full py-2">S&apos;inscrire</Button>
+          <Button type="submit" variant='primary' className="w-full py-2">S&apos;inscrire</Button>
 
           {apiError && <p className="text-red-600 text-center mt-4">{apiError}</p>}
 
