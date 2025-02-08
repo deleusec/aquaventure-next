@@ -68,7 +68,7 @@ export default function ActivityTypesGrid() {
         ))
       ) : (
         <p className="text-center col-span-full text-gray-500">
-          Aucun type d'activité trouvé.
+          Aucun type d&apos;activité trouvé.
         </p>
       )}
     </div>

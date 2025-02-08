@@ -5,10 +5,7 @@ import { updateUserSchema } from "@/schemas/usersSchemas";
 import { writeFile, unlink } from "fs/promises";
 import path from "path";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }) {
   const session = await getSession();
   if (
     !session ||
@@ -36,10 +33,7 @@ export async function GET(
   return NextResponse.json(user);
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }) {
   const session = await getSession();
   if (
     !session ||
@@ -139,10 +133,7 @@ export async function PUT(
   return NextResponse.json({ message: "User updated", user: updatedUser });
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }) {
   const session = await getSession();
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Calendar, Info, Trash2, CheckCircle2 } from "lucide-react";
 import {
   Card,
@@ -39,7 +38,6 @@ type BookingWithActivity = Reservation & {
 };
 
 export default function Bookings() {
-  const router = useRouter();
   const [bookings, setBookings] = useState<{
     upcoming: BookingWithActivity[];
     past: BookingWithActivity[];
@@ -102,6 +100,7 @@ export default function Bookings() {
   // Déclencher la recherche quand le composant monte et quand la recherche change
   useEffect(() => {
     fetchBookings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   const renderBookingCard = (booking: BookingWithActivity, isPast: boolean) => (
@@ -226,7 +225,7 @@ export default function Bookings() {
                 Retour
               </Button>
               <Button variant="destructive" onClick={handleCancelBooking}>
-                Confirmer l'annulation
+                Confirmer l&apos;annulation
               </Button>
             </DialogFooter>
           </DialogContent>

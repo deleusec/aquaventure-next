@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Activity, ActivityType } from "@prisma/client";
@@ -26,7 +26,7 @@ type ActivityTypeOption = {
   label: string;
 };
 
-export default function Activities() {
+const ActivitiesPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -94,11 +94,13 @@ export default function Activities() {
     };
 
     fetchActivityTypes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Une seule fois au montage
 
   useEffect(() => {
     console.log("selectedTypes", selectedTypes);
     fetchActivities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, selectedTypes, page]);
 
   const fetchActivities = async () => {
@@ -259,4 +261,12 @@ export default function Activities() {
       </div>
     </div>
   );
-}
+};
+
+const ActivitiesPageWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <ActivitiesPage />
+  </Suspense>
+);
+
+export default ActivitiesPageWrapper;

@@ -91,6 +91,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(type);
   } catch (error) {
+    console.error("Erreur:", error);
     return NextResponse.json({ error: "Erreur de création" }, { status: 500 });
   }
 }

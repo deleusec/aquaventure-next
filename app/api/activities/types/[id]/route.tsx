@@ -4,10 +4,7 @@ import prisma from "@/lib/prisma";
 import { writeFile } from "fs/promises";
 import path from "path";
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }) {
   try {
     const id = parseInt(params.id);
 
@@ -44,11 +41,7 @@ export async function DELETE(
   }
 }
 
-
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }) {
   try {
     const typeId = parseInt(params.id);
     const formData = await request.formData();
@@ -60,7 +53,11 @@ export async function PUT(
 
     if (imageFile) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const filePath = path.join(process.cwd(), "public/uploads", `${typeId}-${Date.now()}.jpg`);
+      const filePath = path.join(
+        process.cwd(),
+        "public/uploads",
+        `${typeId}-${Date.now()}.jpg`
+      );
       await writeFile(filePath, buffer);
       imageUrl = `/uploads/${path.basename(filePath)}`;
     }
@@ -85,6 +82,9 @@ export async function PUT(
     return NextResponse.json(updatedType);
   } catch (error) {
     console.error("Erreur de modification:", error);
-    return NextResponse.json({ error: "Erreur lors de la modification" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors de la modification" },
+      { status: 500 }
+    );
   }
 }

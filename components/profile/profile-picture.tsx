@@ -28,6 +28,7 @@ export default function ProfilePicture() {
 
   useEffect(() => {
     initializeUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

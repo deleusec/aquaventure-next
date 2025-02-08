@@ -86,6 +86,7 @@ export default function ActivitiesList() {
 
   useEffect(() => {
     fetchActivities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page, itemsPerPage]);
 
   // Gestion de la suppression

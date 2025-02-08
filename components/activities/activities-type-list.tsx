@@ -85,6 +85,7 @@ export default function ActivityTypesList() {
 
   useEffect(() => {
     fetchTypes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page, itemsPerPage]);
 
   const fetchTypes = async () => {
