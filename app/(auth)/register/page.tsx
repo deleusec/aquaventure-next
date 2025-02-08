@@ -60,11 +60,11 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {["firstName", "lastName", "email", "password"].map((field, index) => (
+          {["firstname", "lastname", "email", "password"].map((field, index) => (
             <div key={index}>
               <Input
                 name={field}
-                placeholder={field.replace(/([A-Z])/g, ' $1').trim()}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                 onChange={handleChange}
                 value={form[field as keyof typeof form]}
                 type={field === "password" ? "password" : "text"}
