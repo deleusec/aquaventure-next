@@ -6,24 +6,26 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          Int           @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String        @unique
-  password    String
-  role        Role          @default(USER)
+  id           Int           @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  email        String        @unique
+  password     String
+  role         Role          @default(USER)
   reservations Reservation[]
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  media     Media[]
 }
 
 enum Role {
@@ -36,24 +38,27 @@ model ActivityType {
   name       String
   activities Activity[]
 
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  media     Media?
 }
 
 model Activity {
-  id                Int           @id @default(autoincrement())
-  name              String
-  activityTypeId    Int
-  availableSpots    Int
-  description       String?
-  startDateTime     DateTime
-  duration          Int // Duration in minutes
-  reservations      Reservation[]
+  id             Int           @id @default(autoincrement())
+  name           String
+  activityTypeId Int
+  availableSpots Int
+  description    String?
+  startDateTime  DateTime
+  duration       Int 
+  outdated          Boolean       @default(false)
+  reservations   Reservation[]
 
-  activityType      ActivityType  @relation(fields: [activityTypeId], references: [id])
+  activityType ActivityType @relation(fields: [activityTypeId], references: [id])
 
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  media     Media[]
 }
 
 model Reservation {
@@ -63,9 +68,31 @@ model Reservation {
   reservationDate  DateTime  @default(now())
   status           Boolean   @default(true) 
 
-  user             User      @relation(fields: [userId], references: [id])
-  activity         Activity  @relation(fields: [activityId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  activity Activity @relation(fields: [activityId], references: [id])
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MediaType {
+  PROFILE
+  ACTIVITY
+  ACTIVITY_TYPE
+}
+
+model Media {
+  id             Int       @id @default(autoincrement())
+  url            String
+  type           MediaType
+  userId         Int?      @unique
+  activityId     Int?      @unique
+  activityTypeId Int?      @unique
+
+  user         User?         @relation(fields: [userId], references: [id])
+  activity     Activity?     @relation(fields: [activityId], references: [id])
+  activityType ActivityType? @relation(fields: [activityTypeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
