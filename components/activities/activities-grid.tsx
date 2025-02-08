@@ -1,9 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
+"use client"
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Activity, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 interface ActivityType {
   id: number;
@@ -17,19 +25,44 @@ interface ActivityType {
 
 export default function ActivityTypesGrid() {
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
+    setIsLoading(true);
     fetch("/api/activities/types?limit=8")
       .then((response) => response.json())
-      .then((data) => setActivityTypes(data.items))
-      .catch((error) => console.error("Error fetching activity types:", error));
+      .then((data) => {
+        setActivityTypes(data.items);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching activity types:", error);
+        setIsLoading(false);
+      });
   }, []);
 
   const handleTypeClick = (typeId: number) => {
-    // Naviguer vers la page des activités avec un filtre par type
     router.push(`/activities?activityTypeId=${typeId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+        {[...Array(6)].map((_, index) => (
+          <Card key={index} className="overflow-hidden">
+            <CardHeader className="space-y-2">
+              <Skeleton className="h-6 w-2/3" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-20 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
@@ -37,39 +70,51 @@ export default function ActivityTypesGrid() {
         activityTypes.map((type) => (
           <Card
             key={type.id}
-            className="hover:shadow-lg transition-shadow cursor-pointer"
+            className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary"
             onClick={() => handleTypeClick(type.id)}
           >
             <CardHeader>
-              <CardTitle>{type.name}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
+                  {type.name}
+                </CardTitle>
+                <Activity className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+              <CardDescription className="text-sm text-muted-foreground">
+                Activités disponibles dans cette catégorie
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">
-                  Activités disponibles
-                </span>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary" className="text-sm">
+                  {type._count?.activities || 0} activité
+                  {(type._count?.activities || 0) > 1 ? "s" : ""}
+                </Badge>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
+                  className="group-hover:translate-x-1 transition-transform"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleTypeClick(type.id);
                   }}
                 >
-                  Voir les activités
+                  Explorer <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
-              </div>
-              <div className="mt-2 text-sm font-medium">
-                {type._count?.activities || 0} activité
-                {(type._count?.activities || 0) > 1 ? "s" : ""}
               </div>
             </CardContent>
           </Card>
         ))
       ) : (
-        <p className="text-center col-span-full text-gray-500">
-          Aucun type d&apos;activité trouvé.
-        </p>
+        <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+          <Activity className="w-12 h-12 text-muted-foreground mb-4" />
+          <p className="text-xl font-medium text-muted-foreground">
+            Aucun type d&apos;activité trouvé.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Les types d'activités apparaîtront ici une fois créés
+          </p>
+        </div>
       )}
     </div>
   );

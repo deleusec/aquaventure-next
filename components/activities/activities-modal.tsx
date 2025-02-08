@@ -183,14 +183,14 @@ export default function ActivityModal({
             <Label>Image</Label>
             <div className="relative rounded-md border">
               {previewImage && (
-              <Image
-                src={previewImage}
-                alt="Activity Image"
-                width={100}
-                height={100}
-                objectFit="cover"
-                className="rounded-md w-32 h-32 object-cover"
-              />
+                <Image
+                  src={previewImage}
+                  alt="Activity Image"
+                  width={100}
+                  height={100}
+                  objectFit="cover"
+                  className="rounded-md w-32 h-32 object-cover"
+                />
               )}
             </div>
             <Input type="file" accept="image/*" onChange={handleImageChange} />
@@ -211,32 +211,34 @@ export default function ActivityModal({
 
           {/* Type d'activité */}
           <div className="space-y-2">
-          <Label htmlFor="activityType">Type d&apos;activité</Label>
-            <Select
-              value={formData.activityTypeId}
-              onValueChange={(value) =>
-                setFormData({ ...formData, activityTypeId: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un type" />
-              </SelectTrigger>
-              <SelectContent>
-                {activityTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id.toString()}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="activityType">Type d&apos;activité</Label>
+            <div className="flex gap-2">
+              <Select
+                value={formData.activityTypeId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, activityTypeId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activityTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsNewTypeDialogOpen(true)}
-            >
-              + Type
-            </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsNewTypeDialogOpen(true)}
+              >
+                + Type
+              </Button>
+            </div>
           </div>
 
           {/* Places disponibles */}
@@ -278,6 +280,7 @@ export default function ActivityModal({
                 setFormData({ ...formData, startDateTime: e.target.value })
               }
               required
+              className="[&::-webkit-calendar-picker-indicator]:invert"
             />
           </div>
 
