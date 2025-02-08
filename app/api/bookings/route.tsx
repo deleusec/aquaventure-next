@@ -178,11 +178,15 @@ export async function POST(request: NextRequest) {
     });
 
     // Envoyer un email de confirmation
-    await sendMail(
-      session.email,
-      "Confirmation de réservation",
-      `Votre réservation pour l'activité ${activity.name} a été confirmée.`
-    );
+    try {
+      await sendMail(
+        session.email,
+        "Confirmation de réservation",
+        `Votre réservation pour l'activité ${activity.name} a été confirmée.`
+      );
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de l'email de confirmation:", error);
+    }
 
     return NextResponse.json(booking);
   } catch (error) {
@@ -239,11 +243,15 @@ export async function DELETE(request: NextRequest) {
     });
 
     // Envoyer un email d'annulation
-    await sendMail(
-      session.email,
-      "Annulation de réservation",
-      `Votre réservation pour l'activité ${existingBooking.activity.name} a été annulée.`
-    );
+    try {
+      await sendMail(
+        session.email,
+        "Annulation de réservation",
+        `Votre réservation pour l'activité ${existingBooking.activity.name} a été annulée.`
+      );
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de l'email d'annulation:", error);
+    }
 
     return NextResponse.json(cancelledBooking);
   } catch (error) {
