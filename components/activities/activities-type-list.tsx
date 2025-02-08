@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface ActivityTypeWithCount extends ActivityType {
   _count?: {
@@ -57,9 +58,13 @@ export default function ActivityTypesList() {
   const [isNewTypeDialogOpen, setIsNewTypeDialogOpen] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const handleEditType = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEditError(null);
     try {
       const res = await fetch(`/api/activities/types/${editingType?.id}`, {
         method: "PUT",
@@ -67,13 +72,19 @@ export default function ActivityTypesList() {
         body: JSON.stringify({ name: editTypeName }),
       });
 
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de la modification");
+      }
 
       await fetchTypes();
       setEditingType(null);
       setEditTypeName("");
     } catch (error) {
       console.error("Erreur lors de la modification:", error);
+      setEditError(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
   };
 
@@ -110,6 +121,7 @@ export default function ActivityTypesList() {
 
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCreateError(null);
     try {
       const res = await fetch("/api/activities/types", {
         method: "POST",
@@ -117,37 +129,43 @@ export default function ActivityTypesList() {
         body: JSON.stringify({ name: newTypeName }),
       });
 
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de la création");
+      }
 
       await fetchTypes();
       setNewTypeName("");
       setIsNewTypeDialogOpen(false);
     } catch (error) {
       console.error("Erreur lors de la création:", error);
+      setCreateError(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
   };
 
-const handleDeleteType = async (id: number) => {
-  try {
-    const res = await fetch(`/api/activities/types/${id}`, {
-      method: "DELETE",
-    });
+  const handleDeleteType = async (id: number) => {
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/activities/types/${id}`, {
+        method: "DELETE",
+      });
 
-    const data = await res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Erreur lors de la suppression");
+      }
 
-    if (!res.ok) {
-      throw new Error(data.error || "Erreur lors de la suppression");
+      await fetchTypes();
+      setDeleteId(null);
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      setDeleteError(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
-
-    await fetchTypes(); 
-
-    setDeleteId(null); 
-  } catch (error) {
-    console.error("Erreur lors de la suppression:", error);
-  } finally {
-    setDeleteId(null);
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -278,6 +296,11 @@ const handleDeleteType = async (id: number) => {
           <DialogHeader>
             <DialogTitle>Modifier le Type d&apos;Activité</DialogTitle>
           </DialogHeader>
+          {editError && (
+            <Alert variant="destructive">
+              <AlertDescription>{editError}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleEditType} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="editName">Nom du type</Label>
@@ -308,6 +331,11 @@ const handleDeleteType = async (id: number) => {
           <DialogHeader>
             <DialogTitle>Nouveau Type d&apos;Activité</DialogTitle>
           </DialogHeader>
+          {createError && (
+            <Alert variant="destructive">
+              <AlertDescription>{createError}</AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleCreateType} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nom du type</Label>
@@ -345,6 +373,11 @@ const handleDeleteType = async (id: number) => {
               irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteError && (
+            <Alert variant="destructive">
+              <AlertDescription>{deleteError}</AlertDescription>
+            </Alert>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
