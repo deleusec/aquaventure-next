@@ -127,19 +127,27 @@ export default function ActivityTypesList() {
     }
   };
 
-  const handleDeleteType = async (id: number) => {
-    try {
-      const res = await fetch(`/api/activities/types/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        await fetchTypes();
-      }
-    } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
+const handleDeleteType = async (id: number) => {
+  try {
+    const res = await fetch(`/api/activities/types/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Erreur lors de la suppression");
     }
+
+    await fetchTypes(); 
+
+    setDeleteId(null); 
+  } catch (error) {
+    console.error("Erreur lors de la suppression:", error);
+  } finally {
     setDeleteId(null);
-  };
+  }
+};
 
   if (loading) {
     return (
