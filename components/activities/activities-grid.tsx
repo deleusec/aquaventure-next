@@ -112,7 +112,7 @@ export default function ActivityTypesGrid() {
             Aucun type d&apos;activité trouvé.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Les types d'activités apparaîtront ici une fois créés
+            Les types d&apos;activités apparaîtront ici une fois créés
           </p>
         </div>
       )}

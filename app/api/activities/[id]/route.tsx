@@ -103,10 +103,7 @@ export async function PUT(request: NextRequest, { params }) {
     );
   }
 }
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }) {
   try {
     const activityId = parseInt(params.id);
 
@@ -158,33 +155,33 @@ export async function DELETE(
       });
     });
 
-     if (activity.media && activity.media.length > 0) {
-       for (const media of activity.media) {
-         try {
-           // Extraire le nom du fichier de l'URL
-           const fileName = media.url.split("/").pop();
-           if (fileName) {
-             const filePath = path.join(
-               process.cwd(),
-               "public/uploads",
-               fileName
-             );
-             await unlink(filePath);
-           }
-         } catch (fileError) {
-           console.error(
-             `Erreur lors de la suppression du fichier: ${media.url}`,
-             fileError
-           );
-           // On continue même si la suppression du fichier échoue
-         }
-       }
-     }
+    if (activity.media && activity.media.length > 0) {
+      for (const media of activity.media) {
+        try {
+          // Extraire le nom du fichier de l'URL
+          const fileName = media.url.split("/").pop();
+          if (fileName) {
+            const filePath = path.join(
+              process.cwd(),
+              "public/uploads",
+              fileName
+            );
+            await unlink(filePath);
+          }
+        } catch (fileError) {
+          console.error(
+            `Erreur lors de la suppression du fichier: ${media.url}`,
+            fileError
+          );
+          // On continue même si la suppression du fichier échoue
+        }
+      }
+    }
 
-     return NextResponse.json({
-       message:
-         "Activité et toutes ses données associées supprimées avec succès",
-     });
+    return NextResponse.json({
+      message:
+        "Activité et toutes ses données associées supprimées avec succès",
+    });
 
     return NextResponse.json({
       message:
