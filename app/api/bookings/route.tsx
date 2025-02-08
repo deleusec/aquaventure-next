@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { sendMail } from "@/lib/mailer";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const session = await getSession();
 
   if (!session) {
@@ -120,9 +121,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json();
-
-    // Vérification de la présence de activityId
     const activityId = data.activityId;
+
     if (!activityId) {
       return NextResponse.json(
         { error: "L'identifiant de l'activité est requis" },
@@ -130,7 +130,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier l'existence de l'activité
     const activity = await prisma.activity.findUnique({
       where: { id: Number(activityId) },
     });
@@ -142,7 +141,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier les places disponibles
     if (activity.availableSpots <= 0) {
       return NextResponse.json(
         { error: "Aucune place disponible" },
@@ -150,7 +148,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier s'il n'y a pas déjà une réservation
     const existingBooking = await prisma.reservation.findFirst({
       where: {
         userId: Number(session.id),
@@ -166,7 +163,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Création de la réservation
     const booking = await prisma.reservation.create({
       data: {
         userId: Number(session.id),
@@ -176,11 +172,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Mettre à jour les places disponibles
     await prisma.activity.update({
       where: { id: Number(activityId) },
       data: { availableSpots: { decrement: 1 } },
     });
+
+    // Envoyer un email de confirmation
+    await sendMail(
+      session.email,
+      "Confirmation de réservation",
+      `Votre réservation pour l'activité ${activity.name} a été confirmée.`
+    );
 
     return NextResponse.json(booking);
   } catch (error) {
@@ -194,7 +196,8 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-export async function DELETE(request: Request) {
+
+export async function DELETE(request: NextRequest) {
   const session = await getSession();
 
   if (!session) {
@@ -204,7 +207,6 @@ export async function DELETE(request: Request) {
   try {
     const { bookingId } = await request.json();
 
-    // Vérifier l'existence de la réservation
     const existingBooking = await prisma.reservation.findUnique({
       where: {
         id: Number(bookingId),
@@ -222,7 +224,6 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Annuler la réservation
     const cancelledBooking = await prisma.reservation.update({
       where: { id: Number(bookingId) },
       data: {
@@ -230,13 +231,19 @@ export async function DELETE(request: Request) {
       },
     });
 
-    // Restaurer le nombre de places disponibles
     await prisma.activity.update({
       where: { id: existingBooking.activityId },
       data: {
         availableSpots: { increment: 1 },
       },
     });
+
+    // Envoyer un email d'annulation
+    await sendMail(
+      session.email,
+      "Annulation de réservation",
+      `Votre réservation pour l'activité ${existingBooking.activity.name} a été annulée.`
+    );
 
     return NextResponse.json(cancelledBooking);
   } catch (error) {
