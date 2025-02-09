@@ -81,7 +81,7 @@ export default function UsersAdmin() {
         role: editUser.role,
       });
 
-      setPreviewImage(editUser.media?.[0]?.url || "/default-avatar.png");
+      setPreviewImage(editUser.media?.[0]?.url || "/blank-profile-picture.png");
     }
   }, [editUser]);
 
@@ -170,7 +170,7 @@ export default function UsersAdmin() {
               <TableRow key={user.id}>
                 <TableCell>
                   <Image
-                    src={user.media?.[0]?.url || "/default-avatar.png"}
+                    src={user.media?.[0]?.url || "/blank-profile-picture.png"}
                     alt={`${user.firstName} ${user.lastName}`}
                     width={32}
                     height={32}
@@ -220,7 +220,7 @@ export default function UsersAdmin() {
               <div className="flex items-center space-x-4">
                 <div className="relative w-12 h-12">
                   <Image
-                    src={previewImage || "/default-avatar.png"}
+                    src={previewImage || "/blank-profile-picture.png"}
                     width={48}
                     height={48}
                     alt="Avatar"
