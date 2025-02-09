@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Projet Réservations
 
-## Getting Started
+> by Corentin Deleuse & Julien Morel
 
-First, run the development server:
+## Description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Ce projet est un système de réservation pour un parc d'activités, développé avec Next.js 15+, App Router, Prisma et TypeScript. Il permet aux utilisateurs de créer des comptes, de se connecter, de gérer leurs profils, de consulter les activités disponibles, de réserver des activités et de gérer leurs réservations. Les administrateurs peuvent également gérer les activités et consulter des statistiques.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Fonctionnalités
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Gestion des utilisateurs :**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+  - Création de compte
+  - Connexion et déconnexion
+  - Modification et suppression de profil
 
-## Learn More
+- **Gestion des activités :**
 
-To learn more about Next.js, take a look at the following resources:
+  - Consultation des activités disponibles
+  - Ajout, modification et suppression d'activités (pour les administrateurs)
+  - Recherche d'activités par nom
+  - Filtrage des activités par catégorie
+  - Consultation des détails d'une activité
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Gestion des réservations :**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+  - Réservation d'une activité
+  - Consultation et annulation des réservations
 
-## Deploy on Vercel
+- **Statistiques :**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  - Consultation des statistiques (pour les administrateurs)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Autres fonctionnalités :**
+  - Envoi d'e-mails de confirmation de réservation et d'annulation
+
+## Contributions
+
+- **Corentin Deleuse** : Développeur
+- **Julien Morel** : Développeur
