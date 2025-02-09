@@ -1,22 +1,44 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { registerSchema } from "@/schemas/authSchemas";
-import { z } from 'zod';
+import { z } from "zod";
+
+const FORM_FIELDS = [
+  { name: "firstName", label: "Prénom", type: "text" },
+  { name: "lastName", label: "Nom", type: "text" },
+  { name: "email", label: "Email", type: "email" },
+  { name: "password", label: "Mot de passe", type: "password" },
+] as const;
+
+type FormData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [form, setForm] = useState<FormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
+    {}
+  );
   const [apiError, setApiError] = useState("");
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
     setApiError("");
   };
 
@@ -28,23 +50,25 @@ export default function RegisterPage() {
     try {
       registerSchema.parse(form);
 
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
       if (res.ok) {
-        router.push('/login');
+        router.push("/login");
       } else {
         const data = await res.json();
         setApiError(data.error || "Une erreur est survenue.");
       }
     } catch (err) {
       if (err instanceof z.ZodError) {
-        const fieldErrors: { [key: string]: string } = {};
+        const fieldErrors: Partial<Record<keyof FormData, string>> = {};
         err.errors.forEach((error) => {
-          fieldErrors[error.path[0]] = error.message;
+          if (error.path[0]) {
+            fieldErrors[error.path[0] as keyof FormData] = error.message;
+          }
         });
         setErrors(fieldErrors);
       } else {
@@ -60,29 +84,37 @@ export default function RegisterPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {["firstName", "lastname", "email", "password"].map((field, index) => (
-            <div key={index}>
+          {FORM_FIELDS.map(({ name, label, type }) => (
+            <div key={name}>
               <Input
-                name={field}
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                name={name}
+                placeholder={label}
+                type={type}
+                value={form[name as keyof FormData]}
                 onChange={handleChange}
-                value={form[field as keyof typeof form]}
-                type={field === "password" ? "password" : "text"}
                 className={`w-full p-2 border rounded-md ${
-                  errors[field] ? "border-red-500" : "border-gray-300"
+                  errors[name] ? "border-red-500" : "border-gray-300"
                 }`}
               />
-              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+              {errors[name] && (
+                <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+              )}
             </div>
           ))}
 
-          <Button type="submit" variant='primary' className="w-full py-2">S&apos;inscrire</Button>
+          <Button type="submit" variant="primary" className="w-full py-2">
+            S&apos;inscrire
+          </Button>
 
-          {apiError && <p className="text-red-600 text-center mt-4">{apiError}</p>}
+          {apiError && (
+            <p className="text-red-600 text-center mt-4">{apiError}</p>
+          )}
 
           <div className="text-center mt-4 text-sm">
             Déjà un compte ?{" "}
-            <a href="/login" className="hover:underline">Se connecter</a>
+            <a href="/login" className="hover:underline">
+              Se connecter
+            </a>
           </div>
         </form>
       </CardContent>
