@@ -58,7 +58,8 @@ export default function UsersAdmin() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [editUser, setEditUser] = useState<User | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
   const [editFormData, setEditFormData] = useState({
@@ -68,23 +69,47 @@ export default function UsersAdmin() {
     role: "USER",
   });
 
+  // Effet de nettoyage global
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
+  // Effet pour gérer l'ouverture/fermeture de la modale d'édition
   useEffect(() => {
-    if (editUser) {
+    if (isEditModalOpen && selectedUser) {
       setEditFormData({
-        firstName: editUser.firstName,
-        lastName: editUser.lastName,
-        email: editUser.email,
-        role: editUser.role,
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        email: selectedUser.email,
+        role: selectedUser.role,
       });
-
-      setPreviewImage(editUser.media?.[0]?.url || "/blank-profile-picture.png");
+      setPreviewImage(
+        selectedUser.media?.[0]?.url || "/blank-profile-picture.png"
+      );
+    } else {
+      // Nettoyage lors de la fermeture
+      setTimeout(() => {
+        setSelectedImage(null);
+        setPreviewImage("/blank-profile-picture.png");
+        setEditFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          role: "USER",
+        });
+        document.body.style.pointerEvents = "";
+        document.body.style.overflow = "";
+      }, 300);
     }
-  }, [editUser]);
+  }, [isEditModalOpen, selectedUser]);
 
   const fetchUsers = async () => {
     try {
@@ -109,16 +134,28 @@ export default function UsersAdmin() {
         method: "DELETE",
       });
       if (!res.ok) throw new Error();
-      fetchUsers();
+      await fetchUsers();
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
     }
     setDeleteId(null);
   };
 
+  const handleOpenEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setTimeout(() => {
+      setSelectedUser(null);
+    }, 300);
+  };
+
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editUser) return;
+    if (!selectedUser) return;
 
     try {
       const formData = new FormData();
@@ -130,15 +167,15 @@ export default function UsersAdmin() {
         formData.append("image", selectedImage);
       }
 
-      const res = await fetch(`/api/users/${editUser.id}`, {
+      const res = await fetch(`/api/users/${selectedUser.id}`, {
         method: "PUT",
-        body: formData, // ✅ Envoi en FormData
+        body: formData,
       });
 
       if (!res.ok) throw new Error();
 
-      fetchUsers();
-      setEditUser(null);
+      await fetchUsers();
+      handleCloseEditModal();
     } catch (error) {
       console.error("Erreur lors de la modification:", error);
     }
@@ -189,7 +226,9 @@ export default function UsersAdmin() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setEditUser(user)}>
+                      <DropdownMenuItem
+                        onClick={() => handleOpenEditModal(user)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
@@ -210,13 +249,12 @@ export default function UsersAdmin() {
       </div>
 
       {/* Modal d'édition */}
-      <Dialog open={editUser !== null} onOpenChange={() => setEditUser(null)}>
+      <Dialog open={isEditModalOpen} onOpenChange={handleCloseEditModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Modifier l&apos;Utilisateur</DialogTitle>
             <DialogDescription>
-              {" "}
-              {editUser?.firstName} {editUser?.lastName}
+              {selectedUser?.firstName} {selectedUser?.lastName}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
@@ -305,7 +343,7 @@ export default function UsersAdmin() {
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setEditUser(null)}>
+              <Button variant="outline" onClick={handleCloseEditModal}>
                 Annuler
               </Button>
               <Button type="submit">Enregistrer</Button>
