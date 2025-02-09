@@ -39,9 +39,8 @@ import {
 import { Alert, AlertDescription } from "../ui/alert";
 
 interface ActivityTypeWithCount extends ActivityType {
-  _count?: {
-    activities: number;
-  };
+  totalActivities: number;
+  availableActivitiesCount?: number;
 }
 
 export default function ActivityTypesList() {
@@ -105,6 +104,7 @@ export default function ActivityTypesList() {
         page: page.toString(),
         limit: itemsPerPage.toString(),
         search: search,
+        showAvailable: "true", // Pour obtenir le compte des activités disponibles
       });
 
       const res = await fetch(`/api/activities/types?${searchParams}`);
@@ -196,7 +196,7 @@ export default function ActivityTypesList() {
           <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
             <TableRow>
               <TableHead>Nom</TableHead>
-              <TableHead>Nombre d&apos;activités</TableHead>
+              <TableHead>Activités</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -205,7 +205,20 @@ export default function ActivityTypesList() {
               types.map((type) => (
                 <TableRow key={type.id}>
                   <TableCell>{type.name}</TableCell>
-                  <TableCell>{type._count?.activities ?? 0}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm">
+                        Total : {type.totalActivities} activité
+                        {type.totalActivities > 1 ? "s" : ""}
+                      </span>
+                      {type.availableActivitiesCount !== undefined && (
+                        <span className="text-sm text-muted-foreground">
+                          Disponibles : {type.availableActivitiesCount} activité
+                          {type.availableActivitiesCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button

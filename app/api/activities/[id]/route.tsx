@@ -12,7 +12,6 @@ const ActivitySchema = z.object({
   description: z.string(),
   startDateTime: z.coerce.date(),
   duration: z.coerce.number(),
-  image: z.instanceof(File).nullable(),
 });
 
 export async function GET(request: NextRequest, { params }) {
@@ -46,6 +45,8 @@ export async function PUT(request: NextRequest, { params }) {
     const activityId = parseInt(params.id);
     const formData = await request.formData();
 
+    // Séparer les données du fichier
+    const imageFile = formData.get("image") as Blob | null;
     const data = {
       name: formData.get("name") as string,
       activityTypeId: parseInt(formData.get("activityTypeId") as string),
@@ -53,10 +54,9 @@ export async function PUT(request: NextRequest, { params }) {
       description: formData.get("description") as string,
       startDateTime: new Date(formData.get("startDateTime") as string),
       duration: parseInt(formData.get("duration") as string),
-      image: formData.get("image") as File | null,
     };
 
-    // Valider les données avec zod
+    // Valider les données sans le fichier
     const result = ActivitySchema.safeParse(data);
     if (!result.success) {
       return NextResponse.json(
@@ -66,8 +66,8 @@ export async function PUT(request: NextRequest, { params }) {
     }
 
     let imageUrl = null;
-    if (result.data.image) {
-      const buffer = Buffer.from(await result.data.image.arrayBuffer());
+    if (imageFile) {
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
       const filePath = path.join(
         process.cwd(),
         "public/uploads",

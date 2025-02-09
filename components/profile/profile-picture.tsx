@@ -18,17 +18,16 @@ export default function ProfilePicture() {
   const [open, setOpen] = useState(false);
   const { user, loading, initializeUser } = useUser();
 
-
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
 
-  const profileImage = user?.media?.[0]?.url || "/avatar-placeholder.png";
+  const profileImage = user?.media?.[0]?.url || "/blank-profile-picture.png";
 
   useEffect(() => {
     initializeUser();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -36,14 +35,24 @@ export default function ProfilePicture() {
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer">
-          {!loading ? (
-              <Image
-                src={profileImage}
-                alt="Profile picture"
-                width={40}
-                height={40}
-                className="object-cover w-full h-full"
-              />
+            {!loading ? (
+              profileImage ? (
+                <Image
+                  src={profileImage}
+                  alt="Profile picture"
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <Image
+                  src="/blank-profile-picture.png"
+                  alt="Default profile picture"
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
+              )
             ) : (
               <div className="w-full h-full bg-gray-200 animate-pulse" />
             )}
@@ -51,22 +60,22 @@ export default function ProfilePicture() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="absolute right-0">
-            <DropdownMenuItem onClick={() => router.push("/profile")}>
-                Profile
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
+            Profile
+          </DropdownMenuItem>
+          {user?.role === "ADMIN" && (
+            <DropdownMenuItem onClick={() => router.push("/admin")}>
+              Admin
             </DropdownMenuItem>
-            {user?.role === "ADMIN" && (
-              <DropdownMenuItem onClick={() => router.push("/admin")}>
-                Admin
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              color="danger"
-              className="text-destructive"
-              onClick={handleLogout}
-            >
-              <LogOutIcon className="w-5 h-5" />
-              Logout
-            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem
+            color="danger"
+            className="text-destructive"
+            onClick={handleLogout}
+          >
+            <LogOutIcon className="w-5 h-5" />
+            Logout
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
