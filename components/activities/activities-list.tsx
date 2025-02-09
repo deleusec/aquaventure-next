@@ -45,7 +45,7 @@ type ActivityWithType = Activity & {
 };
 
 export default function ActivitiesList() {
-  // États
+  // États de base
   const [activities, setActivities] = useState<ActivityWithType[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -53,10 +53,11 @@ export default function ActivitiesList() {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [activityModal, setActivityModal] = useState<{
-    open: boolean;
-    activity: ActivityWithType | null;
-  }>({ open: false, activity: null });
+
+  // États séparés pour la modale
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedActivity, setSelectedActivity] =
+    useState<ActivityWithType | null>(null);
 
   // Récupération des activités
   const fetchActivities = async () => {
@@ -86,8 +87,21 @@ export default function ActivitiesList() {
 
   useEffect(() => {
     fetchActivities();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page, itemsPerPage]);
+
+  // Gestionnaire pour ouvrir la modale
+  const handleOpenModal = (activity: ActivityWithType | null = null) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  // Gestionnaire pour fermer la modale
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => {
+      setSelectedActivity(null);
+    }, 300);
+  };
 
   // Gestion de la suppression
   const handleDelete = async (id: number) => {
@@ -132,11 +146,7 @@ export default function ActivitiesList() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
-        <Button
-          onClick={() => setActivityModal({ open: true, activity: null })}
-        >
-          Nouvelle Activité
-        </Button>
+        <Button onClick={() => handleOpenModal(null)}>Nouvelle Activité</Button>
       </div>
 
       <div className="flex flex-1 flex-col rounded-t-lg border overflow-auto relative">
@@ -177,9 +187,7 @@ export default function ActivitiesList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() =>
-                            setActivityModal({ open: true, activity })
-                          }
+                          onClick={() => handleOpenModal(activity)}
                         >
                           <Pencil className="mr-2 h-4 w-4" />
                           Modifier
@@ -261,9 +269,9 @@ export default function ActivitiesList() {
 
       {/* Modale de création/édition */}
       <ActivityModal
-        open={activityModal.open}
-        activity={activityModal.activity}
-        onOpenChange={(open) => setActivityModal({ open, activity: null })}
+        open={isModalOpen}
+        activity={selectedActivity}
+        onOpenChange={handleCloseModal}
         onSuccess={fetchActivities}
       />
 

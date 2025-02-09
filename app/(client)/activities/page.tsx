@@ -36,35 +36,12 @@ const ActivitiesPage = () => {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const itemsPerPage = 9;
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const updateUrlWithTypes = (newTypes: string[]) => {
-    const current = new URLSearchParams(window.location.search);
-    current.delete("activityTypeId");
-    newTypes.forEach((typeId) => {
-      current.append("activityTypeId", typeId);
-    });
-    const search = current.toString();
-    const newUrl = `${window.location.pathname}${search ? `?${search}` : ""}`;
-    router.push(newUrl);
-  };
-
-  const handleTypeChange = (newTypes: string[]) => {
-    setSelectedTypes(newTypes);
-    if (newTypes.length === 0 || newTypes.length === activityTypes.length) {
-      const current = new URLSearchParams(window.location.search);
-      current.delete("activityTypeId");
-      const newUrl = `${window.location.pathname}${
-        current.toString() ? `?${current.toString()}` : ""
-      }`;
-      router.push(newUrl);
-    } else {
-      updateUrlWithTypes(newTypes);
-    }
-  };
-
+  // Fonction pour récupérer les types d'activités initiaux
   useEffect(() => {
     const fetchActivityTypes = async () => {
       try {
@@ -78,24 +55,58 @@ const ActivitiesPage = () => {
           }));
           setActivityTypes(transformedTypes);
 
-          // Réinitialiser la sélection après le chargement des types
+          // Récupérer les types depuis l'URL
           const typeIds = searchParams.getAll("activityTypeId");
           if (typeIds.length > 0) {
-            setSelectedTypes([...typeIds]);
+            setSelectedTypes(typeIds);
           }
-        } else {
-          setActivityTypes([]);
+          setInitialLoadComplete(true);
         }
       } catch (error) {
         console.error("Erreur de récupération des types:", error);
-        setActivityTypes([]);
+        setInitialLoadComplete(true);
       }
     };
 
     fetchActivityTypes();
-  }, [searchParams]); // Ajout de searchParams comme dépendance
+  }, [searchParams]);
+
+  const updateUrlWithTypes = useCallback(
+    (newTypes: string[]) => {
+      const current = new URLSearchParams(window.location.search);
+      current.delete("activityTypeId");
+      newTypes.forEach((typeId) => {
+        current.append("activityTypeId", typeId);
+      });
+      const search = current.toString();
+      const newUrl = `${window.location.pathname}${search ? `?${search}` : ""}`;
+      router.push(newUrl);
+    },
+    [router]
+  );
+
+  const handleTypeChange = useCallback(
+    (newTypes: string[]) => {
+      setSelectedTypes(newTypes);
+      setPage(1); // Réinitialiser la page lors du changement de filtre
+
+      if (newTypes.length === 0 || newTypes.length === activityTypes.length) {
+        const current = new URLSearchParams(window.location.search);
+        current.delete("activityTypeId");
+        const newUrl = `${window.location.pathname}${
+          current.toString() ? `?${current.toString()}` : ""
+        }`;
+        router.push(newUrl);
+      } else {
+        updateUrlWithTypes(newTypes);
+      }
+    },
+    [activityTypes.length, router, updateUrlWithTypes]
+  );
 
   const fetchActivities = useCallback(async () => {
+    if (!initialLoadComplete) return;
+
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -126,13 +137,31 @@ const ActivitiesPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, search, selectedTypes, activityTypes]);
+  }, [page, search, selectedTypes, activityTypes.length, initialLoadComplete]);
 
-  const debouncedFetchActivities = useCallback(() => debounce(fetchActivities, 300)(), [fetchActivities]);
+  const debouncedFetchActivities = useCallback(
+    debounce(() => {
+      fetchActivities();
+    }, 300),
+    [fetchActivities]
+  );
 
   useEffect(() => {
-    debouncedFetchActivities();
-  }, [search, selectedTypes, page, debouncedFetchActivities]);
+    if (initialLoadComplete) {
+      debouncedFetchActivities();
+    }
+  }, [
+    search,
+    selectedTypes,
+    page,
+    initialLoadComplete,
+    debouncedFetchActivities,
+  ]);
+
+  // Ne rendre le contenu que lorsque le chargement initial est terminé
+  if (!initialLoadComplete) {
+    return <div className="container py-8">Chargement initial...</div>;
+  }
 
   return (
     <div className="container py-8 h-[calc(100vh-4rem)] flex flex-col space-y-6">
@@ -148,7 +177,7 @@ const ActivitiesPage = () => {
         <MultiSelect
           options={activityTypes}
           onValueChange={handleTypeChange}
-          value={selectedTypes}
+          defaultValue={selectedTypes}
           placeholder="Filtrer par type"
           variant="inverted"
           animation={0.5}

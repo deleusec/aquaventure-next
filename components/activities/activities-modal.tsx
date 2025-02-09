@@ -39,6 +39,7 @@ export default function ActivityModal({
   onOpenChange,
   onSuccess,
 }: ActivityModalProps) {
+  // États
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -53,6 +54,14 @@ export default function ActivityModal({
   const [isNewTypeDialogOpen, setIsNewTypeDialogOpen] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
 
+  // Nettoyage des états lors de la fermeture ou du démontage
+  useEffect(() => {
+    return () => {
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   // Récupération des types d'activités
   const fetchActivityTypes = async () => {
     try {
@@ -66,41 +75,52 @@ export default function ActivityModal({
     }
   };
 
+  // Initialisation et nettoyage
   useEffect(() => {
     if (open) {
       fetchActivityTypes();
-    }
-  }, [open]);
-
-  // Pré-remplissage du formulaire si une activité est passée en prop
-  useEffect(() => {
-    if (activity) {
-      setFormData({
-        name: activity.name,
-        activityTypeId: activity.activityTypeId.toString(),
-        availableSpots: activity.availableSpots.toString(),
-        description: activity.description || "",
-        startDateTime: new Date(activity.startDateTime)
-          .toISOString()
-          .slice(0, 16),
-        duration: activity.duration.toString(),
-      });
-
-      setPreviewImage(activity.media[0].url || "/default-activity.png");
+      if (activity) {
+        setFormData({
+          name: activity.name,
+          activityTypeId: activity.activityTypeId.toString(),
+          availableSpots: activity.availableSpots.toString(),
+          description: activity.description || "",
+          startDateTime: new Date(activity.startDateTime)
+            .toISOString()
+            .slice(0, 16),
+          duration: activity.duration.toString(),
+        });
+        setPreviewImage(activity.media?.[0]?.url || "/default-activity.png");
+      }
     } else {
-      setFormData({
-        name: "",
-        activityTypeId: "",
-        availableSpots: "",
-        description: "",
-        startDateTime: "",
-        duration: "",
-      });
-      setPreviewImage(null);
+      // Nettoyage lors de la fermeture
+      setTimeout(() => {
+        setFormData({
+          name: "",
+          activityTypeId: "",
+          availableSpots: "",
+          description: "",
+          startDateTime: "",
+          duration: "",
+        });
+        setSelectedImage(null);
+        setPreviewImage(null);
+        setNewTypeName("");
+        setIsNewTypeDialogOpen(false);
+        document.body.style.pointerEvents = "";
+        document.body.style.overflow = "";
+      }, 300);
     }
-  }, [activity]);
+  }, [open, activity]);
 
-  // Gestion du changement d'image
+  // Gestionnaires d'événements
+  const handleClose = () => {
+    document.body.style.pointerEvents = "";
+    document.body.style.overflow = "";
+    setIsNewTypeDialogOpen(false);
+    onOpenChange(false);
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedImage(e.target.files[0]);
@@ -108,18 +128,14 @@ export default function ActivityModal({
     }
   };
 
-  // Gestion de la soumission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("activityTypeId", formData.activityTypeId);
-      formDataToSend.append("availableSpots", formData.availableSpots);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("startDateTime", formData.startDateTime);
-      formDataToSend.append("duration", formData.duration);
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
+      });
       if (selectedImage) {
         formDataToSend.append("image", selectedImage);
       }
@@ -127,7 +143,6 @@ export default function ActivityModal({
       const url = activity
         ? `/api/activities/${activity.id}`
         : `/api/activities`;
-
       const method = activity ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -138,13 +153,12 @@ export default function ActivityModal({
       if (!res.ok) throw new Error();
 
       onSuccess?.();
-      onOpenChange(false);
+      handleClose();
     } catch (error) {
       console.error("Erreur lors de l'opération:", error);
     }
   };
 
-  // Création d'un nouveau type d'activité avec sélection automatique
   const handleCreateType = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -158,187 +172,195 @@ export default function ActivityModal({
       if (!res.ok) throw new Error();
 
       const newType = await res.json();
-
-      // Mise à jour de la liste et sélection automatique du type créé
       setActivityTypes((prev) => [...prev, newType]);
-      setFormData((prev) => ({ ...prev, activityTypeId: newType.id.toString() }));
-
+      setFormData((prev) => ({
+        ...prev,
+        activityTypeId: newType.id.toString(),
+      }));
       setIsNewTypeDialogOpen(false);
       setNewTypeName("");
     } catch (error) {
       console.error("Erreur lors de la création du type:", error);
     }
   };
+
+  // Rendu
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {activity ? "Modifier l'activité" : "Créer une activité"}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image Preview */}
-          <div className="flex flex-col items-center gap-2">
-            <Label>Image</Label>
-            <div className="relative rounded-md border">
-              {previewImage && (
-                <Image
-                  src={previewImage}
-                  alt="Activity Image"
-                  width={100}
-                  height={100}
-                  objectFit="cover"
-                  className="rounded-md w-32 h-32 object-cover"
-                />
-              )}
-            </div>
-            <Input type="file" accept="image/*" onChange={handleImageChange} />
-          </div>
-
-          {/* Nom */}
-          <div className="space-y-2">
-            <Label htmlFor="name">Nom</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          {/* Type d'activité */}
-          <div className="space-y-2">
-            <Label htmlFor="activityType">Type d&apos;activité</Label>
-            <div className="flex gap-2">
-              <Select
-                value={formData.activityTypeId}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, activityTypeId: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {activityTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id.toString()}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsNewTypeDialogOpen(true)}
-              >
-                + Type
-              </Button>
-            </div>
-          </div>
-
-          {/* Places disponibles */}
-          <div className="space-y-2">
-            <Label htmlFor="availableSpots">Places disponibles</Label>
-            <Input
-              id="availableSpots"
-              type="number"
-              min="1"
-              value={formData.availableSpots}
-              onChange={(e) =>
-                setFormData({ ...formData, availableSpots: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              rows={4}
-            />
-          </div>
-
-          {/* Date et durée */}
-          <div className="space-y-2">
-            <Label htmlFor="startDateTime">Date et heure de début</Label>
-            <Input
-              id="startDateTime"
-              type="datetime-local"
-              value={formData.startDateTime}
-              onChange={(e) =>
-                setFormData({ ...formData, startDateTime: e.target.value })
-              }
-              required
-              className="[&::-webkit-calendar-picker-indicator]:invert"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="duration">Durée (en minutes)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min="1"
-              value={formData.duration}
-              onChange={(e) =>
-                setFormData({ ...formData, duration: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => onOpenChange(false)}
-            >
-              Annuler
-            </Button>
-            <Button type="submit">{activity ? "Modifier" : "Créer"}</Button>
-          </div>
-        </form>
-      </DialogContent>
-
-      <Dialog open={isNewTypeDialogOpen} onOpenChange={setIsNewTypeDialogOpen}>
-        <DialogContent>
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nouveau Type d&apos;Activité</DialogTitle>
+            <DialogTitle>
+              {activity ? "Modifier l'activité" : "Créer une activité"}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateType} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="typeName">Nom du type</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col items-center gap-2">
+              <Label>Image</Label>
+              <div className="relative rounded-md border">
+                {previewImage && (
+                  <Image
+                    src={previewImage}
+                    alt="Activity Image"
+                    width={100}
+                    height={100}
+                    className="rounded-md w-32 h-32 object-cover"
+                  />
+                )}
+              </div>
               <Input
-                id="typeName"
-                value={newTypeName}
-                onChange={(e) => setNewTypeName(e.target.value)}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
               />
             </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsNewTypeDialogOpen(false)}
-              >
+
+            <div className="space-y-2">
+              <Label htmlFor="activityType">Type d&apos;activité</Label>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.activityTypeId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, activityTypeId: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activityTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id.toString()}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsNewTypeDialogOpen(true)}
+                >
+                  + Type
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="availableSpots">Places disponibles</Label>
+              <Input
+                id="availableSpots"
+                type="number"
+                min="1"
+                value={formData.availableSpots}
+                onChange={(e) =>
+                  setFormData({ ...formData, availableSpots: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="startDateTime">Date et heure de début</Label>
+              <Input
+                id="startDateTime"
+                type="datetime-local"
+                value={formData.startDateTime}
+                onChange={(e) =>
+                  setFormData({ ...formData, startDateTime: e.target.value })
+                }
+                required
+                className="[&::-webkit-calendar-picker-indicator]:invert"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="duration">Durée (en minutes)</Label>
+              <Input
+                id="duration"
+                type="number"
+                min="1"
+                value={formData.duration}
+                onChange={(e) =>
+                  setFormData({ ...formData, duration: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" type="button" onClick={handleClose}>
                 Annuler
               </Button>
-              <Button type="submit">Créer</Button>
+              <Button type="submit">{activity ? "Modifier" : "Créer"}</Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    </Dialog>
+
+      {isNewTypeDialogOpen && (
+        <Dialog
+          open={true}
+          onOpenChange={(isOpen) => {
+            document.body.style.pointerEvents = "";
+            if (!isOpen) {
+              setIsNewTypeDialogOpen(false);
+              setNewTypeName("");
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nouveau Type d&apos;Activité</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateType} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="typeName">Nom du type</Label>
+                <Input
+                  id="typeName"
+                  value={newTypeName}
+                  onChange={(e) => setNewTypeName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsNewTypeDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit">Créer</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
