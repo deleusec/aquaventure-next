@@ -1,12 +1,10 @@
 "use client";
 
-import React, { Suspense, useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Activity, ActivityType } from "@prisma/client";
-import {
-  Card,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users } from "lucide-react";
@@ -14,6 +12,7 @@ import { MultiSelect } from "@/components/activities/multi-select";
 import Image from "next/image";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { debounce } from "lodash";
 
 type ActivityWithType = Activity & {
   activityType: ActivityType;
@@ -94,16 +93,10 @@ const ActivitiesPage = () => {
     };
 
     fetchActivityTypes();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Une seule fois au montage
+  }, [searchParams]); // Ajout de searchParams comme dépendance
 
-  useEffect(() => {
-    console.log("selectedTypes", selectedTypes);
-    fetchActivities();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, selectedTypes, page]);
-
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -113,7 +106,7 @@ const ActivitiesPage = () => {
       if (search) {
         params.append("search", search);
       }
-      console.log("jsute avant", selectedTypes);
+
       if (
         selectedTypes.length > 0 &&
         selectedTypes.length !== activityTypes.length
@@ -133,7 +126,13 @@ const ActivitiesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search, selectedTypes, activityTypes]);
+
+  const debouncedFetchActivities = useCallback(() => debounce(fetchActivities, 300)(), [fetchActivities]);
+
+  useEffect(() => {
+    debouncedFetchActivities();
+  }, [search, selectedTypes, page, debouncedFetchActivities]);
 
   return (
     <div className="container py-8 h-[calc(100vh-4rem)] flex flex-col space-y-6">

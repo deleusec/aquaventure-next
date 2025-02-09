@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { put } from '@vercel/blob';
 
 export async function POST(request: Request) {
   try {
@@ -26,13 +25,20 @@ export async function POST(request: Request) {
 
     // Enregistrement de l'image si elle existe
     if (imageFile) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const fileName = `${Date.now()}-${imageFile.name.replace(/\s/g, "_")}`;
-      const filePath = path.join(process.cwd(), "public/uploads", fileName);
+      try {
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const fileName = `${name}-${Date.now()}.jpg`;
 
-      await writeFile(filePath, buffer);
-      imageUrl = `/uploads/${fileName}`;
+        // Enregistrer la nouvelle image sur Vercel Blob
+        const { url } = await put(`uploads/${fileName}`, buffer, { access: 'public' });
+        imageUrl = url;
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (error) {
+        console.error("Failed to upload image:", error);
+        return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      }
     }
+
 
     // Création de l'activité
     const activity = await prisma.activity.create({
