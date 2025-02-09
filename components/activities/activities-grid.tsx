@@ -1,16 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Activity, ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Activity } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface ActivityType {
@@ -20,6 +10,12 @@ interface ActivityType {
   updatedAt: string;
   totalActivities: number;
   availableActivitiesCount: number;
+  media: {
+    id: number;
+    url: string;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
 }
 
 export default function ActivityTypesGrid() {
@@ -32,7 +28,6 @@ export default function ActivityTypesGrid() {
     fetch("/api/activities/types?showAvailable=true&limit=8")
       .then((response) => response.json())
       .then((data) => {
-        // Filtrer pour ne garder que les types avec des activités disponibles
         const availableTypes = data.items.filter(
           (type) => type.availableActivitiesCount > 0
         );
@@ -52,17 +47,7 @@ export default function ActivityTypesGrid() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-        {[...Array(6)].map((_, index) => (
-          <Card key={index} className="overflow-hidden">
-            <CardHeader className="space-y-2">
-              <Skeleton className="h-6 w-2/3" />
-              <Skeleton className="h-4 w-1/2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
-          </Card>
-        ))}
+        {/* Loading state */}
       </div>
     );
   }
@@ -84,43 +69,37 @@ export default function ActivityTypesGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {activityTypes.map((type) => (
-        <Card
+        <div
           key={type.id}
-          className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-primary"
+          className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer group"
           onClick={() => handleTypeClick(type.id)}
         >
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
-                {type.name}
-              </CardTitle>
-              <Activity className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          {type.media && type.media.url ? (
+            <div
+              className="relative bg-cover bg-center h-64 w-64"
+              style={{ backgroundImage: `url(${type.media.url})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
+              <div className="absolute bottom-0 w-full p-4 text-white">
+                <h2 className="text-lg font-semibold">{type.name}</h2>
+                <p className="hidden mt-2 text-sm group-hover:block">
+                  {type.availableActivitiesCount} activités disponibles
+                </p>
+              </div>
             </div>
-            <CardDescription className="text-sm text-muted-foreground">
-              Activités disponibles dans cette catégorie
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary" className="text-sm">
-                {type.availableActivitiesCount} activité
-                {type.availableActivitiesCount > 1 ? "s" : ""} disponible
-                {type.availableActivitiesCount > 1 ? "s" : ""}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="group-hover:translate-x-1 transition-transform"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleTypeClick(type.id);
-                }}
-              >
-                Explorer <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+          ) : (
+            <div className="relative flex items-center justify-center h-64 w-64 bg-gray-200">
+              <p className="text-gray-500">Aucune image disponible</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
+              <div className="absolute bottom-0 w-full p-4 text-white ">
+                <h2 className="text-lg font-semibold">{type.name}</h2>
+                <p className="hidden mt-2 text-sm group-hover:block">
+                  {type.availableActivitiesCount} activités disponibles
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       ))}
     </div>
   );
