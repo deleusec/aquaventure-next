@@ -2,20 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { updateUserSchema } from "@/schemas/usersSchemas";
-import { writeFile, unlink } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 
-export async function GET(request: Request, { params }) {
+export async function GET(request, { params }) {
   const session = await getSession();
-  if (
-    !session ||
-    (session.role !== "ADMIN" && session.id !== Number(params.id))
-  ) {
+  const id = Number((await params).id); // Attendre params avant d'accéder à id
+
+  if (!session || (session.role !== "ADMIN" && session.id !== id)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: Number(params.id) },
+    where: { id },
     select: {
       id: true,
       email: true,
@@ -33,12 +31,11 @@ export async function GET(request: Request, { params }) {
   return NextResponse.json(user);
 }
 
-export async function PUT(request: Request, { params }) {
+export async function PUT(request, { params }) {
   const session = await getSession();
-  if (
-    !session ||
-    (session.role !== "ADMIN" && session.id !== Number(params.id))
-  ) {
+  const id = Number((await params).id); // Attendre params avant d'accéder à id
+
+  if (!session || (session.role !== "ADMIN" && session.id !== id)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -62,43 +59,33 @@ export async function PUT(request: Request, { params }) {
 
   // Vérifier si l'utilisateur a déjà une image
   const existingMedia = await prisma.media.findUnique({
-    where: { userId: Number(params.id) },
+    where: { userId: id },
   });
 
   if (imageFile) {
-    // Supprimer l'ancienne image si elle existe
-    if (existingMedia) {
-      const oldImagePath = path.join(
-        process.cwd(),
-        "public",
-        existingMedia.url
-      );
-      try {
-        await unlink(oldImagePath);
-      } catch (error) {
-        console.error("Failed to delete old image:", error);
-      }
-    }
+    try {
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const fileName = `${id}-${Date.now()}.jpg`;
 
-    // Enregistrer la nouvelle image
-    const buffer = Buffer.from(await imageFile.arrayBuffer());
-    const filePath = path.join(
-      process.cwd(),
-      "public/uploads",
-      `${params.id}-${Date.now()}.jpg`
-    );
-    await writeFile(filePath, buffer);
-    imageUrl = `/uploads/${path.basename(filePath)}`;
+      // Enregistrer la nouvelle image
+      const { url } = await put(`uploads/${fileName}`, buffer, {
+        access: "public",
+      });
+      imageUrl = url;
+      console.log("Image uploaded successfully:", imageUrl);
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      return NextResponse.json(
+        { error: "Failed to upload image" },
+        { status: 500 }
+      );
+    }
   }
 
   // Mise à jour du profil
   const updatedUser = await prisma.user.update({
-    where: { id: Number(params.id) },
-    data: {
-      firstName,
-      lastName,
-      email,
-    },
+    where: { id },
+    data: { firstName, lastName, email },
     select: {
       id: true,
       email: true,
@@ -113,16 +100,12 @@ export async function PUT(request: Request, { params }) {
   if (imageUrl) {
     if (existingMedia) {
       await prisma.media.update({
-        where: { userId: Number(params.id) },
+        where: { userId: id },
         data: { url: imageUrl },
       });
     } else {
       await prisma.media.create({
-        data: {
-          url: imageUrl,
-          type: "PROFILE",
-          userId: Number(params.id),
-        },
+        data: { url: imageUrl, type: "PROFILE", userId: id },
       });
     }
 
@@ -133,33 +116,28 @@ export async function PUT(request: Request, { params }) {
   return NextResponse.json({ message: "User updated", user: updatedUser });
 }
 
-export async function DELETE(request: Request, { params }) {
+export async function DELETE(request, { params }) {
   const session = await getSession();
+  const id = Number((await params).id); // Attendre params avant d'accéder à id
+
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   // Supprimer l'image associée s'il y en a une
   const existingMedia = await prisma.media.findUnique({
-    where: { userId: Number(params.id) },
+    where: { userId: id },
   });
 
   if (existingMedia) {
-    const imagePath = path.join(process.cwd(), "public", existingMedia.url);
-    try {
-      await unlink(imagePath);
-    } catch (error) {
-      console.error("Failed to delete user image:", error);
-    }
-
     await prisma.media.delete({
-      where: { userId: Number(params.id) },
+      where: { userId: id },
     });
   }
 
   // Supprimer l'utilisateur
   await prisma.user.delete({
-    where: { id: Number(params.id) },
+    where: { id },
   });
 
   return NextResponse.json({ message: "User deleted" });

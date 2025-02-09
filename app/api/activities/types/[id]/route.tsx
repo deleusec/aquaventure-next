@@ -1,12 +1,10 @@
-// app/api/activities/types/[id]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 
-export async function DELETE(request: Request, { params }) {
+export async function DELETE(request, { params }) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     // Vérifier s'il y a des activités liées
     const type = await prisma.activityType.findUnique({
@@ -41,9 +39,9 @@ export async function DELETE(request: Request, { params }) {
   }
 }
 
-export async function PUT(request: Request, { params }) {
+export async function PUT(request, { params }) {
   try {
-    const typeId = parseInt(params.id);
+    const typeId = parseInt((await params).id);
     const formData = await request.formData();
 
     const name = formData.get("name") as string;
@@ -52,14 +50,18 @@ export async function PUT(request: Request, { params }) {
     let imageUrl = null;
 
     if (imageFile) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const filePath = path.join(
-        process.cwd(),
-        "public/uploads",
-        `${typeId}-${Date.now()}.jpg`
-      );
-      await writeFile(filePath, buffer);
-      imageUrl = `/uploads/${path.basename(filePath)}`;
+      try {
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const fileName = `${typeId}-${Date.now()}.jpg`;
+
+        // Enregistrer la nouvelle image sur Vercel Blob
+        const { url } = await put(`uploads/${fileName}`, buffer, { access: 'public' });
+        imageUrl = url;
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (error) {
+        console.error("Failed to upload image:", error);
+        return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      }
     }
 
     const updatedType = await prisma.activityType.update({

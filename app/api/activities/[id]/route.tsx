@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { unlink, writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { z } from "zod";
 
 // Schéma de validation pour les données de la requête PUT
@@ -14,9 +13,9 @@ const ActivitySchema = z.object({
   duration: z.coerce.number(),
 });
 
-export async function GET(request: NextRequest, { params }) {
+export async function GET(request, { params }) {
   try {
-    const activityId = parseInt(params.id);
+    const activityId = parseInt((await params).id);
 
     const activity = await prisma.activity.findUnique({
       where: { id: activityId },
@@ -40,9 +39,9 @@ export async function GET(request: NextRequest, { params }) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }) {
+export async function PUT(request, { params }) {
   try {
-    const activityId = parseInt(params.id);
+    const activityId = parseInt((await params).id);
     const formData = await request.formData();
 
     // Séparer les données du fichier
@@ -67,14 +66,18 @@ export async function PUT(request: NextRequest, { params }) {
 
     let imageUrl = null;
     if (imageFile) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const filePath = path.join(
-        process.cwd(),
-        "public/uploads",
-        `${activityId}-${Date.now()}.jpg`
-      );
-      await writeFile(filePath, buffer);
-      imageUrl = `/uploads/${path.basename(filePath)}`;
+      try {
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const fileName = `${activityId}-${Date.now()}.jpg`;
+
+        // Enregistrer la nouvelle image sur Vercel Blob
+        const { url } = await put(`uploads/${fileName}`, buffer, { access: 'public' });
+        imageUrl = url;
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (error) {
+        console.error("Failed to upload image:", error);
+        return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      }
     }
 
     const updatedActivity = await prisma.activity.update({
@@ -103,9 +106,10 @@ export async function PUT(request: NextRequest, { params }) {
     );
   }
 }
-export async function DELETE(request: Request, { params }) {
+
+export async function DELETE(request, { params }) {
   try {
-    const activityId = parseInt(params.id);
+    const activityId = parseInt((await params).id);
 
     // Vérifier si l'activité existe avec ses réservations
     const activity = await prisma.activity.findUnique({
@@ -153,34 +157,6 @@ export async function DELETE(request: Request, { params }) {
       await tx.activity.delete({
         where: { id: activityId },
       });
-    });
-
-    if (activity.media && activity.media.length > 0) {
-      for (const media of activity.media) {
-        try {
-          // Extraire le nom du fichier de l'URL
-          const fileName = media.url.split("/").pop();
-          if (fileName) {
-            const filePath = path.join(
-              process.cwd(),
-              "public/uploads",
-              fileName
-            );
-            await unlink(filePath);
-          }
-        } catch (fileError) {
-          console.error(
-            `Erreur lors de la suppression du fichier: ${media.url}`,
-            fileError
-          );
-          // On continue même si la suppression du fichier échoue
-        }
-      }
-    }
-
-    return NextResponse.json({
-      message:
-        "Activité et toutes ses données associées supprimées avec succès",
     });
 
     return NextResponse.json({
