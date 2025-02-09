@@ -1,14 +1,10 @@
 "use client";
 
-import { Activity, ActivityType } from "@prisma/client";
 import { useState, useEffect } from "react";
 import ActivityDetails from "@/components/activities/details";
 import { useParams } from "next/navigation";
 import { Suspense } from "react";
-
-export type ActivityWithType = Activity & {
-  activityType: ActivityType;
-};
+import { ActivityWithType } from "@/lib/type";
 
 export default function ActivityPage() {
   const [activity, setActivity] = useState<ActivityWithType | null>(null);
