@@ -34,7 +34,7 @@ export default function ProfilePage() {
         lastName: user.lastName,
         email: user.email,
       });
-      setPreviewImage(user.media?.[0]?.url || "/avatar-placeholder.png");
+      setPreviewImage(user.media?.[0]?.url || "/blank-profile-picture.png");
     }
   }, [user]);
 
@@ -117,7 +117,7 @@ export default function ProfilePage() {
           <DialogTrigger asChild>
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary cursor-pointer hover:opacity-80 transition">
               <Image
-                src={user.media?.[0]?.url || "/avatar-placeholder.png"}
+                src={user.media?.[0]?.url || "/blank-profile-picture.png"}
                 alt="Profile Picture"
                 layout="fill"
                 objectFit="cover"
@@ -133,7 +133,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center gap-4">
               <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary">
                 <Image
-                  src={previewImage || "/avatar-placeholder.png"}
+                  src={previewImage || "/blank-profile-picture.png"}
                   alt="Preview"
                   width={128}
                   height={128}
