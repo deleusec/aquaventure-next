@@ -11,11 +11,11 @@ interface AdminStats {
   totalActivities: number;
   totalReservations: number;
   popularActivities: { name: string; _count: { reservations: number } }[];
-  conversionRate: number;
+  conversionRate: number | null;
   recentActivities: { name: string; startDateTime: string }[];
   activeUsers: number;
   activityTypeDistribution: { name: string; _count: { activities: number } }[];
-  avgReservationsPerUser: number;
+  avgReservationsPerUser: number | null;
   upcomingActivities: { name: string; startDateTime: string }[];
 }
 
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {stats?.conversionRate.toFixed(2)}%
+            {stats?.conversionRate !== null ? `${stats.conversionRate.toFixed(2)}%` : 'N/A'}
           </CardContent>
         </Card>
 
@@ -123,7 +123,7 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">
-            {stats?.avgReservationsPerUser.toFixed(2)}
+            {stats?.avgReservationsPerUser !== null ? stats.avgReservationsPerUser.toFixed(2) : 'N/A'}
           </CardContent>
         </Card>
       </div>
