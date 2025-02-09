@@ -46,7 +46,7 @@ export default function ActivityTypesGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16 p-8">
         {/* Loading state */}
       </div>
     );
@@ -67,7 +67,7 @@ export default function ActivityTypesGrid() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16 p-8">
       {activityTypes.map((type) => (
         <div
           key={type.id}
