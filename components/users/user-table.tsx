@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface User {
   id: number;
@@ -69,7 +70,7 @@ export default function UsersAdmin() {
 
   useEffect(() => {
     fetchUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   useEffect(() => {
@@ -213,6 +214,10 @@ export default function UsersAdmin() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Modifier l&apos;Utilisateur</DialogTitle>
+            <DialogDescription>
+              {" "}
+              {editUser?.firstName} {editUser?.lastName}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-4">
             <div className="space-y-2">
