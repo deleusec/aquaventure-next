@@ -37,10 +37,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "../ui/alert";
+import Image from "next/image";
 
 interface ActivityTypeWithCount extends ActivityType {
   totalActivities: number;
   availableActivitiesCount?: number;
+  media: { url: string } | null;
 }
 
 export default function ActivityTypesList() {
@@ -60,15 +62,22 @@ export default function ActivityTypesList() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleEditType = async (e: React.FormEvent) => {
     e.preventDefault();
     setEditError(null);
     try {
+      const formData = new FormData();
+      formData.append("name", editTypeName);
+      if (selectedImage) {
+        formData.append("image", selectedImage);
+      }
+
       const res = await fetch(`/api/activities/types/${editingType?.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editTypeName }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -79,6 +88,8 @@ export default function ActivityTypesList() {
       await fetchTypes();
       setEditingType(null);
       setEditTypeName("");
+      setSelectedImage(null);
+      setPreviewImage(null);
     } catch (error) {
       console.error("Erreur lors de la modification:", error);
       setEditError(
@@ -90,6 +101,7 @@ export default function ActivityTypesList() {
   useEffect(() => {
     if (editingType) {
       setEditTypeName(editingType.name);
+      setPreviewImage(editingType.media?.url || null);
     }
   }, [editingType]);
 
@@ -124,10 +136,15 @@ export default function ActivityTypesList() {
     e.preventDefault();
     setCreateError(null);
     try {
+      const formData = new FormData();
+      formData.append("name", newTypeName);
+      if (selectedImage) {
+        formData.append("image", selectedImage);
+      }
+
       const res = await fetch("/api/activities/types", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newTypeName }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -138,6 +155,8 @@ export default function ActivityTypesList() {
       await fetchTypes();
       setNewTypeName("");
       setIsNewTypeDialogOpen(false);
+      setSelectedImage(null);
+      setPreviewImage(null);
     } catch (error) {
       console.error("Erreur lors de la création:", error);
       setCreateError(
@@ -168,6 +187,13 @@ export default function ActivityTypesList() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedImage(e.target.files[0]);
+      setPreviewImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -192,9 +218,9 @@ export default function ActivityTypesList() {
 
       <div className="flex flex-1 flex-col rounded-t-lg border overflow-auto relative">
         <Table className="min-w-full border-collapse">
-          {/* TableHeader bien fixé en haut */}
           <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
             <TableRow>
+              <TableHead>Image</TableHead>  
               <TableHead>Nom</TableHead>
               <TableHead>Activités</TableHead>
               <TableHead>Actions</TableHead>
@@ -204,6 +230,18 @@ export default function ActivityTypesList() {
             {types && types.length > 0 ? (
               types.map((type) => (
                 <TableRow key={type.id}>
+                  <TableCell>
+                    {type.media && (
+                      <Image
+                        src={type.media.url}
+                        alt={type.name}
+                        width={50}
+                        height={50}
+                        objectFit="cover"
+                        className="rounded-md"
+                      />
+                    )}
+                  </TableCell>
                   <TableCell>{type.name}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
@@ -316,6 +354,22 @@ export default function ActivityTypesList() {
             </Alert>
           )}
           <form onSubmit={handleEditType} className="space-y-4">
+            <div className="flex flex-col items-center gap-2">
+              <Label>Image</Label>
+              <div className="relative rounded-md border">
+                {previewImage && (
+                  <Image
+                    src={previewImage}
+                    alt="Type Image"
+                    width={100}
+                    height={100}
+                    objectFit="cover"
+                    className="rounded-md w-32 h-32 object-cover"
+                  />
+                )}
+              </div>
+              <Input type="file" accept="image/*" onChange={handleImageChange} />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="editName">Nom du type</Label>
               <Input
@@ -339,7 +393,6 @@ export default function ActivityTypesList() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog pour créer un nouveau type */}
       <Dialog open={isNewTypeDialogOpen} onOpenChange={setIsNewTypeDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -351,6 +404,22 @@ export default function ActivityTypesList() {
             </Alert>
           )}
           <form onSubmit={handleCreateType} className="space-y-4">
+            <div className="flex flex-col items-center gap-2">
+              <Label>Image</Label>
+              <div className="relative rounded-md border">
+                {previewImage && (
+                  <Image
+                    src={previewImage}
+                    alt="Type Image"
+                    width={100}
+                    height={100}
+                    objectFit="cover"
+                    className="rounded-md w-32 h-32 object-cover"
+                  />
+                )}
+              </div>
+              <Input type="file" accept="image/*" onChange={handleImageChange} />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="name">Nom du type</Label>
               <Input
@@ -374,7 +443,6 @@ export default function ActivityTypesList() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog de confirmation de suppression */}
       <AlertDialog
         open={deleteId !== null}
         onOpenChange={() => setDeleteId(null)}

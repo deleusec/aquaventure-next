@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, CartesianGrid, XAxis, Tooltip, Legend } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltipContent,
-  ChartLegendContent,
-} from "@/components/ui/chart";
+import { BarChart, Bar, CartesianGrid, XAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChartConfig } from "../../components/ui/chart";
-import { Calendar, ChartLine, Medal, Trophy, User } from "lucide-react";
+import { User, Trophy, Calendar, Medal, ChartLine, Activity, Users } from "lucide-react";
 
 interface AdminStats {
   totalUsers: number;
   totalActivities: number;
   totalReservations: number;
   popularActivities: { name: string; _count: { reservations: number } }[];
-  reservationsByMonth: { month: string; count: number }[];
+  conversionRate: number;
+  recentActivities: { name: string; startDateTime: string }[];
+  activeUsers: number;
+  activityTypeDistribution: { name: string; _count: { activities: number } }[];
+  avgReservationsPerUser: number;
+  upcomingActivities: { name: string; startDateTime: string }[];
 }
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,17 +38,6 @@ export default function AdminDashboard() {
 
     fetchStats();
   }, []);
-
-  const chartConfig = {
-    desktop: {
-      label: "Desktop",
-      color: "#2563eb",
-    },
-    mobile: {
-      label: "Mobile",
-      color: "#60a5fa",
-    },
-  } satisfies ChartConfig;
 
   if (loading) {
     return (
@@ -101,6 +90,42 @@ export default function AdminDashboard() {
             {stats?.totalReservations}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <ChartLine className="w-6 h-6 mr-2" />
+              Taux de Conversion
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">
+            {stats?.conversionRate.toFixed(2)}%
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <Users className="w-6 h-6 mr-2" />
+              Utilisateurs Actifs
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">
+            {stats?.activeUsers}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <Activity className="w-6 h-6 mr-2" />
+              Réservations par Utilisateur
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">
+            {stats?.avgReservationsPerUser.toFixed(2)}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Graphique des activités populaires */}
@@ -112,50 +137,80 @@ export default function AdminDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer className="min-h-[200px] w-full" config={chartConfig}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={stats?.popularActivities}>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="name"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Legend content={<ChartLegendContent />} />
-              <Bar
-                dataKey="_count.reservations"
-                fill="var(--chart-1)"
-                radius={4}
-              />
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="_count.reservations" fill="#8884d8" animationBegin={600} animationDuration={1500} />
             </BarChart>
-          </ChartContainer>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Graphique des réservations par mois */}
+      {/* Graphique de la répartition des types d'activités */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center">
             <ChartLine className="w-6 h-6 mr-2" />
-            Réservations par mois
+            Répartition des Types d&apos;Activités
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChartContainer className="min-h-[200px] w-full" config={chartConfig}>
-            <BarChart data={stats?.reservationsByMonth}>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <Tooltip content={<ChartTooltipContent />} />
-              <Legend content={<ChartLegendContent />} />
-              <Bar dataKey="count" fill="var(--chart-2)" radius={4} />
-            </BarChart>
-          </ChartContainer>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={stats?.activityTypeDistribution} dataKey="_count.activities" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label>
+                {stats?.activityTypeDistribution.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Graphique des activités récentes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center">
+            <Activity className="w-6 h-6 mr-2" />
+            Activités Récentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={stats?.recentActivities}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="startDateTime" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Graphique des activités à venir */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center">
+            <Calendar className="w-6 h-6 mr-2" />
+            Activités à Venir
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={stats?.upcomingActivities}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="startDateTime" stroke="#8884d8" />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
