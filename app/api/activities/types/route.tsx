@@ -1,9 +1,8 @@
-// app/api/activities/types/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url, "http://localhost");
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const search = searchParams.get("search") || "";
@@ -34,6 +33,7 @@ export async function GET(request: Request) {
               activities: true,
             },
           },
+          media: true, // Inclure les médias associés
         },
         orderBy: { name: "asc" },
         skip,
@@ -45,7 +45,8 @@ export async function GET(request: Request) {
       ...type,
       totalActivities: type._count.activities,
       availableActivitiesCount: type.activities.length,
-      activities: undefined, // On supprime le tableau d'activités de la réponse
+      activities: undefined, // Supprimer le tableau d'activités de la réponse
+      media: type.media || null, // Inclure les médias dans la réponse
     }));
 
     return NextResponse.json({
@@ -72,6 +73,7 @@ export async function POST(request: Request) {
             activities: true,
           },
         },
+        media: true,
       },
     });
     return NextResponse.json(type);
