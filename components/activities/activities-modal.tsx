@@ -204,6 +204,7 @@ export default function ActivityModal({
                     alt="Activity Image"
                     width={100}
                     height={100}
+                    loading="lazy"
                     className="rounded-md w-32 h-32 object-cover"
                   />
                 )}

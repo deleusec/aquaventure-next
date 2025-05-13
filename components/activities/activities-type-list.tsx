@@ -237,6 +237,7 @@ export default function ActivityTypesList() {
                         alt={type.name}
                         width={50}
                         height={50}
+                        loading="lazy"
                         objectFit="cover"
                         className="rounded-md"
                       />
@@ -363,6 +364,7 @@ export default function ActivityTypesList() {
                     alt="Type Image"
                     width={100}
                     height={100}
+                    loading="lazy"
                     objectFit="cover"
                     className="rounded-md w-32 h-32 object-cover"
                   />
@@ -413,6 +415,7 @@ export default function ActivityTypesList() {
                     alt="Type Image"
                     width={100}
                     height={100}
+                    loading="lazy"
                     objectFit="cover"
                     className="rounded-md w-32 h-32 object-cover"
                   />

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { put } from '@vercel/blob';
+import sharp from "sharp";
 
 export async function POST(request: Request) {
   try {
@@ -27,10 +28,20 @@ export async function POST(request: Request) {
     if (imageFile) {
       try {
         const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const fileName = `${name}-${Date.now()}.jpg`;
-
-        // Enregistrer la nouvelle image sur Vercel Blob
-        const { url } = await put(`uploads/${fileName}`, buffer, { access: 'public' });
+    
+        const webpBuffer = await sharp(buffer)
+          .resize({ width: 512 }) 
+          .webp({ quality: 80 })
+          .toBuffer();
+    
+        const safeName = name.replace(/[^a-z0-9]/gi, "_").toLowerCase(); 
+        const fileName = `${safeName}-${Date.now()}.webp`;
+    
+        const { url } = await put(`uploads/${fileName}`, webpBuffer, {
+          access: "public",
+          contentType: "image/webp",
+        });
+    
         imageUrl = url;
         console.log("Image uploaded successfully:", imageUrl);
       } catch (error) {

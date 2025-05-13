@@ -42,6 +42,7 @@ export default function ProfilePicture() {
                   alt="Profile picture"
                   width={40}
                   height={40}
+                  loading="lazy"
                   className="object-cover w-full h-full"
                 />
               ) : (
@@ -50,6 +51,7 @@ export default function ProfilePicture() {
                   alt="Default profile picture"
                   width={40}
                   height={40}
+                  loading="lazy"
                   className="object-cover w-full h-full"
                 />
               )

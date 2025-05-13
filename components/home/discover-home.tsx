@@ -3,12 +3,13 @@ import Image from "next/image";
 export default function DiscoverHome() {
   return (
     <div className="min-h-screen w-full flex flex-col xl:flex-row items-center justify-center gap-10 p-4 xl:p-10">
-      
+
       <div className="flex justify-center items-center w-full xl:w-auto">
         <Image
           src="/coral_image.png"
           width={500}
           height={500}
+          loading="lazy"
           alt="Coral with fish"
           className="object-contain max-h-72 sm:max-h-96 xl:max-h-[550px] w-auto rounded-lg min-h-[300px] xl:min-h-[450px]"
         />
@@ -32,6 +33,7 @@ export default function DiscoverHome() {
                     src="/dot.svg"
                     width={8}
                     height={8}
+                    loading="lazy"
                     alt="Dot"
                     className="object-contain w-auto"
                   />

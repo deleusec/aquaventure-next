@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { put } from "@vercel/blob";
 import { z } from "zod";
+import sharp from "sharp";
 
 // Schéma de validation pour les données de la requête PUT
 const ActivitySchema = z.object({
@@ -68,10 +69,15 @@ export async function PUT(request, { params }) {
     if (imageFile) {
       try {
         const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const fileName = `${activityId}-${Date.now()}.jpg`;
-
-        // Enregistrer la nouvelle image sur Vercel Blob
-        const { url } = await put(`uploads/${fileName}`, buffer, { access: 'public' });
+        const webpBuffer = await sharp(buffer)
+          .resize({ width: 512 }) // ou une autre taille adaptée
+          .webp({ quality: 80 })
+          .toBuffer();
+        const fileName = `${activityId}-${Date.now()}.webp`;
+        const { url } = await put(`uploads/${fileName}`, webpBuffer, {
+          access: 'public',
+          contentType: 'image/webp',
+        });
         imageUrl = url;
         console.log("Image uploaded successfully:", imageUrl);
       } catch (error) {
@@ -86,12 +92,12 @@ export async function PUT(request, { params }) {
         ...result.data,
         media: imageUrl
           ? {
-              upsert: {
-                where: { activityId },
-                create: { url: imageUrl, type: "ACTIVITY" },
-                update: { url: imageUrl },
-              },
-            }
+            upsert: {
+              where: { activityId },
+              create: { url: imageUrl, type: "ACTIVITY" },
+              update: { url: imageUrl },
+            },
+          }
           : undefined,
       },
       include: { media: true },

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { updateUserSchema } from "@/schemas/usersSchemas";
 import { put } from "@vercel/blob";
+import sharp from "sharp";
 
 export async function GET(request, { params }) {
   const session = await getSession();
@@ -33,7 +34,7 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   const session = await getSession();
-  const id = Number((await params).id); // Attendre params avant d'accéder à id
+  const id = Number((await params).id);
 
   if (!session || (session.role !== "ADMIN" && session.id !== id)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -65,12 +66,18 @@ export async function PUT(request, { params }) {
   if (imageFile) {
     try {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const fileName = `${id}-${Date.now()}.jpg`;
+      const webpBuffer = await sharp(buffer)
+        .resize({ width: 512 })
+        .webp({ quality: 80 })
+        .toBuffer();
+      const fileName = `${id}-${Date.now()}.webp`;
 
       // Enregistrer la nouvelle image
-      const { url } = await put(`uploads/${fileName}`, buffer, {
+      const { url } = await put(`uploads/${fileName}`, webpBuffer, {
         access: "public",
+        contentType: "image/webp",
       });
+
       imageUrl = url;
       console.log("Image uploaded successfully:", imageUrl);
     } catch (error) {

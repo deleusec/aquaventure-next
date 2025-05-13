@@ -171,6 +171,7 @@ export default function ActivitiesList() {
                       alt="Activity Image"
                       width={50}
                       height={50}
+                      loading="lazy"
                       className="rounded-md object-cover w-10 h-10"
                     />
                   </TableCell>

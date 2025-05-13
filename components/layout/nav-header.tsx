@@ -36,6 +36,7 @@ export default function NavHeader() {
               alt="Dot"
               width={8}
               height={8}
+              loading="lazy"
               className="absolute right-1/2 bottom-0 transform translate-x-1/2"
             />
           )}
@@ -48,6 +49,7 @@ export default function NavHeader() {
               alt="Dot"
               width={8}
               height={8}
+              loading="lazy"
               className="absolute right-1/2 bottom-0 transform translate-x-1/2"
             />
           )}
@@ -60,6 +62,7 @@ export default function NavHeader() {
               alt="Dot"
               width={8}
               height={8}
+              loading="lazy"
               className="absolute right-1/2 bottom-0 transform translate-x-1/2"
             />
           )}

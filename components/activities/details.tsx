@@ -40,6 +40,7 @@ export default function ActivityDetails({
               src={activity.media?.[0]?.url || "/default-activity.jpg"}
               alt={activity.name}
               layout="fill"
+              loading="lazy"
               className="object-contain"
               priority
             />

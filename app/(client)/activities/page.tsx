@@ -201,6 +201,7 @@ const ActivitiesPage = () => {
                       src={activity.media?.[0]?.url || "/default-activity.jpg"}
                       alt={activity.name}
                       fill
+                      loading="lazy"
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />

@@ -9,6 +9,7 @@ export default function ActivitiesHome() {
         alt="gradient"
         width={500}
         height={500}
+        loading="lazy"
         className="-z-10 absolute -top-1/3 left-0 h-full w-auto"
       />
 

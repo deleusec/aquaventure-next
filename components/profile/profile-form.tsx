@@ -120,6 +120,7 @@ export default function ProfilePage() {
                 src={user.media?.[0]?.url || "/blank-profile-picture.png"}
                 alt="Profile Picture"
                 layout="fill"
+                loading="lazy"
                 objectFit="cover"
               />
             </div>
@@ -137,6 +138,7 @@ export default function ProfilePage() {
                   alt="Preview"
                   width={128}
                   height={128}
+                  loading="lazy"
                   className="object-cover w-full h-full"
                 />
               </div>

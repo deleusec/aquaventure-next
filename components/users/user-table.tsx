@@ -212,6 +212,7 @@ export default function UsersAdmin() {
                     alt={`${user.firstName} ${user.lastName}`}
                     width={32}
                     height={32}
+                    loading="lazy"
                     className="object-cover h-8 w-8 rounded-full"
                   />
                 </TableCell>
@@ -266,6 +267,7 @@ export default function UsersAdmin() {
                     src={previewImage || "/blank-profile-picture.png"}
                     width={48}
                     height={48}
+                    loading="lazy"
                     alt="Avatar"
                     className="object-cover h-12 w-12 rounded-full"
                   />
