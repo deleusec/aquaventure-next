@@ -72,7 +72,7 @@ export default function NavHeader() {
       <div className="lg:hidden flex-1">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Ouvrir le menu">
               <Menu className="w-10 h-10" />
             </Button>
           </SheetTrigger>

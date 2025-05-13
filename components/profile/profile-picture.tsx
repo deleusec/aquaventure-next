@@ -34,7 +34,7 @@ export default function ProfilePicture() {
     <div className="flex-1 flex items-center justify-end relative">
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-secondary hover:border-primary transition duration-300 cursor-pointer" aria-label="Ouvrir le menu utilisateur">
             {!loading ? (
               profileImage ? (
                 <Image
